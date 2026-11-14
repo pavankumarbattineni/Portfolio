@@ -1,4 +1,4 @@
-import { Download, MapPin } from "lucide-react";
+import { Briefcase, Download, MapPin, MapPinned } from "lucide-react";
 
 import { profile } from "@/content/profile";
 import { HeroTrace } from "./hero-trace";
@@ -14,9 +14,19 @@ export function Hero() {
       />
       <Container className="relative grid items-center gap-12 pt-14 pb-16 sm:pt-20 sm:pb-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:gap-14 lg:pt-24 lg:pb-28">
         <div>
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-hero-line px-3.5 py-1.5 text-[14px] text-hero-ink">
+          <p className="inline-flex items-center gap-2 rounded-full border border-hero-line px-3.5 py-1.5 text-[14px] text-hero-ink">
             <span aria-hidden="true" className="size-2 rounded-full bg-hero-accent" />
             {profile.openTo}
+          </p>
+          <p className="mt-3 mb-7 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[14px] text-hero-muted">
+            <span className="flex items-center gap-1.5">
+              <MapPinned className="size-4" aria-hidden="true" />
+              {profile.preferredCities}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Briefcase className="size-4" aria-hidden="true" />
+              {profile.workModes}
+            </span>
           </p>
           <p className="text-lg text-hero-muted">{profile.role}</p>
           <h1

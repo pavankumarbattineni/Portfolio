@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Download, Phone } from "lucide-react";
+import { Briefcase, Check, Copy, Download, MapPinned, Phone } from "lucide-react";
 
 import { profile } from "@/content/profile";
 import { Container, GitHubIcon, LinkedInIcon } from "./ui";
@@ -51,6 +51,23 @@ export function Contact() {
           </a>
           <CopyEmail />
         </div>
+
+        <dl className="mt-10 grid max-w-2xl gap-x-10 gap-y-5 sm:grid-cols-2">
+          <div>
+            <dt className="flex items-center gap-1.5 text-[14px] text-hero-muted">
+              <MapPinned className="size-4" aria-hidden="true" />
+              Preferred locations
+            </dt>
+            <dd className="mt-1 text-lg text-hero-ink">{profile.preferredCities}</dd>
+          </div>
+          <div>
+            <dt className="flex items-center gap-1.5 text-[14px] text-hero-muted">
+              <Briefcase className="size-4" aria-hidden="true" />
+              Work mode
+            </dt>
+            <dd className="mt-1 text-lg text-hero-ink">{profile.workModes}</dd>
+          </div>
+        </dl>
 
         <ul className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <li>

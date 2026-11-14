@@ -8,6 +8,9 @@ export const profile = {
   shortName: "Pavan Kumar",
   role: "Agentic AI Engineer",
   openTo: "Open to GenAI Engineer and Agentic AI Engineer roles",
+  /** Listed in order of preference, without labelling any as secondary. */
+  preferredCities: "Hyderabad, Chennai or Bangalore",
+  workModes: "Onsite, hybrid or remote",
   intro:
     "I build multi-agent AI systems that hold up in production: orchestration, MCP tool servers and real-time backends with FastAPI, LangGraph and PostgreSQL, shipped with Docker and CI/CD.",
   location: "Andhra Pradesh, India",
