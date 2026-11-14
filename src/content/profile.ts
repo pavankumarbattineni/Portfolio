@@ -141,6 +141,16 @@ export interface Project {
   brand: { tile: string; ink: string; dot?: string };
   trace: ProjectSpan[];
   traceCaption: string;
+  /** Screenshots of the live app; the first is shown largest. */
+  screens: Screen[];
+}
+
+export interface Screen {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  caption: string;
 }
 
 export const projects: Project[] = [
@@ -180,6 +190,29 @@ export const projects: Project[] = [
       { name: "sse_stream", note: "resumable with Last-Event-ID", depth: 2, start: 47, end: 98 },
     ],
     traceCaption: "One question through Trench. Dense and sparse search run side by side; every span is recorded in LangSmith.",
+    screens: [
+      {
+        src: "/shots/trench-trace.webp",
+        width: 1586,
+        height: 967,
+        alt: "Trench trace view: a span waterfall with query rewrite, hybrid search, rerank and model calls, beside an inspector showing tokens and cost",
+        caption: "The run behind an answer: query rewrite, hybrid search, rerank and the model call, with tokens and cost per step.",
+      },
+      {
+        src: "/shots/trench-answer.webp",
+        width: 1120,
+        height: 780,
+        alt: "A Trench answer with a meal plan, each fact followed by a numbered citation",
+        caption: "An answer grounded in an uploaded guide, every fact linked to its source.",
+      },
+      {
+        src: "/shots/trench-chart.webp",
+        width: 1100,
+        height: 760,
+        alt: "Daily targets and a calorie-by-meal bar chart in a Trench answer, with citations",
+        caption: "Structured output from the same answer, still cited.",
+      },
+    ],
   },
   {
     id: "abyss",
@@ -218,6 +251,29 @@ export const projects: Project[] = [
       { name: "stream_answer", note: "streamed, traced, cost tracked", depth: 2, start: 61, end: 98 },
     ],
     traceCaption: "One request through Abyss. Specialists are whatever the agent's builder defines, up to five at once.",
+    screens: [
+      {
+        src: "/shots/abyss-trace.webp",
+        width: 1565,
+        height: 956,
+        alt: "Abyss trace view: an agent run with summarization middleware, the model call and its guard, with duration, tokens and cost",
+        caption: "An agent run as recorded in LangSmith: middleware, the model call, 15k tokens and $0.03.",
+      },
+      {
+        src: "/shots/abyss-thread.webp",
+        width: 990,
+        height: 670,
+        alt: "An Abyss agent answering in a thread",
+        caption: "A user-built agent answering in its own thread.",
+      },
+      {
+        src: "/shots/abyss-usage.webp",
+        width: 1290,
+        height: 780,
+        alt: "Abyss usage page with total spend, runs, threads and per-run token and cost rows",
+        caption: "Token and cost tracking across every agent run.",
+      },
+    ],
   },
 ];
 
@@ -227,7 +283,7 @@ export const experience = {
   company: "Innoboon Technologies",
   role: "Associate Software Engineer",
   period: "June 2025 – October 2026",
-  location: "Andhra Pradesh, India",
+  location: "Coimbatore, Tamil Nadu, India",
   highlights: [
     {
       metric: "23",
@@ -272,12 +328,15 @@ export const experience = {
 
 export interface SkillGroup {
   title: string;
+  /** One line on what the group is for. */
+  blurb: string;
   skills: { name: string; usedIn?: WorkRef[] }[];
 }
 
 export const skillGroups: SkillGroup[] = [
   {
     title: "Agents and LLMs",
+    blurb: "Orchestrating multi-agent systems: planning, delegation, tools over MCP and the context each model sees.",
     skills: [
       { name: "Agentic AI", usedIn: ["abyss", "innoboon"] },
       { name: "LangGraph", usedIn: ["trench", "abyss", "innoboon"] },
@@ -291,6 +350,7 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     title: "Retrieval and ML foundations",
+    blurb: "Grounding answers in real data, on a degree in AI and machine learning.",
     skills: [
       { name: "Vector databases", usedIn: ["trench"] },
       { name: "Embeddings", usedIn: ["trench"] },
@@ -302,6 +362,7 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     title: "Backend and data",
+    blurb: "The APIs, streams and data models agents run on.",
     skills: [
       { name: "Python", usedIn: ["trench", "abyss", "innoboon"] },
       { name: "FastAPI", usedIn: ["trench", "abyss", "innoboon"] },
@@ -314,6 +375,7 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     title: "Shipping and security",
+    blurb: "Containers, pipelines and auth that take it to production safely.",
     skills: [
       { name: "Docker and Compose", usedIn: ["trench", "abyss"] },
       { name: "GitHub Actions CI/CD", usedIn: ["trench", "abyss"] },

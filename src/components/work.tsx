@@ -1,6 +1,7 @@
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 
 import { projects, type Project } from "@/content/profile";
+import { Screens } from "./screens";
 import { Chip, Container, SectionHeading, cx } from "./ui";
 
 /** Bullets shown before "More details". */
@@ -174,6 +175,10 @@ function ProjectStudy({ project, flip }: { project: Project; flip: boolean }) {
             <p className="mt-2 text-slate text-pretty">{project.hardPart.body}</p>
           </div>
         </div>
+      </div>
+
+      <div className="mt-12 sm:mt-14">
+        <Screens name={project.name} screens={project.screens} />
       </div>
     </article>
   );

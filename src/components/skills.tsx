@@ -1,97 +1,86 @@
-import { Fragment } from "react";
+import { Bot, Library, Server, ShieldCheck, type LucideIcon } from "lucide-react";
 
-import { skillGroups, workLabels, type WorkRef } from "@/content/profile";
-import { Container, SectionHeading } from "./ui";
+import { skillGroups } from "@/content/profile";
+import { Container, SectionHeading, cx } from "./ui";
 
-const COLUMNS: { ref: WorkRef; short: string }[] = [
-  { ref: "trench", short: "Trench" },
-  { ref: "abyss", short: "Abyss" },
-  { ref: "innoboon", short: "Work" },
-  { ref: "degree", short: "Degree" },
+/** Per group, in content order: its icon and its place in the grid. */
+const LAYOUT: { icon: LucideIcon; span: string; featured?: boolean }[] = [
+  { icon: Bot, span: "md:col-span-2", featured: true },
+  { icon: Library, span: "" },
+  { icon: Server, span: "" },
+  { icon: ShieldCheck, span: "md:col-span-2" },
 ];
 
 /**
- * Skills against the work that used them: a dot wherever a skill was put to
- * use, so depth shows at a glance and every claim points at something real.
+ * Skills as a bento grid. The core group (agents and LLMs) is the large navy
+ * card, in the hero's colours; the others sit around it on mist.
  */
 export function Skills() {
-  const unmapped = skillGroups.flatMap((group) => group.skills.filter((skill) => !skill.usedIn));
-
   return (
     <section aria-labelledby="skills-title" id="skills" className="py-20 sm:py-28">
       <Container>
         <SectionHeading
           id="skills-title"
           title="Skills"
-          lead="Each skill against the work I used it in."
+          lead="Agentic AI first, on a backend built to run it in production."
         />
 
-        <div className="mt-12 overflow-hidden rounded-2xl border border-line sm:mt-16">
-          <table className="w-full border-collapse text-left">
-            <caption className="sr-only">Skills and where each was used</caption>
-            <thead className="bg-mist">
-              <tr>
-                <th scope="col" className="px-4 py-3.5 text-[13px] font-medium text-slate sm:px-6">
-                  Skill
-                </th>
-                {COLUMNS.map((column) => (
-                  <th key={column.ref} scope="col" className="w-12 px-0.5 py-3.5 text-center sm:w-32 sm:px-1">
-                    <a href={workLabels[column.ref].href} className="text-[12px] font-semibold text-ink hover:text-accent sm:text-[13px]">
-                      <span className="sm:hidden">{column.short}</span>
-                      <span className="hidden sm:inline">{workLabels[column.ref].label}</span>
-                    </a>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {skillGroups.map((group) => {
-                const rows = group.skills.filter((skill) => skill.usedIn);
-                return (
-                  <Fragment key={group.title}>
-                    <tr className="border-t border-line">
-                      <th
-                        scope="colgroup"
-                        colSpan={COLUMNS.length + 1}
-                        className="px-4 pt-6 pb-2 text-[15px] font-semibold text-ink sm:px-6"
-                      >
-                        {group.title}
-                      </th>
-                    </tr>
-                    {rows.map((skill) => (
-                      <tr key={skill.name} className="transition-colors hover:bg-mist/70">
-                        <th scope="row" className="py-2.5 pr-2 pl-4 text-[15px] leading-snug font-normal sm:px-6">
-                          {skill.name}
-                        </th>
-                        {COLUMNS.map((column) => {
-                          const used = skill.usedIn!.includes(column.ref);
-                          return (
-                            <td key={column.ref} className="px-0.5 py-2.5 text-center sm:px-1">
-                              {used ? (
-                                <span className="inline-block size-2.5 rounded-full bg-accent" aria-label="Used" role="img" />
-                              ) : (
-                                <span className="inline-block size-1 rounded-full bg-line" aria-hidden="true" />
-                              )}
-                              {!used && <span className="sr-only">Not used</span>}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-          {unmapped.length > 0 && (
-            <p className="border-t border-line px-4 py-4 text-[15px] text-slate sm:px-6">
-              Also: {unmapped.map((skill) => skill.name).join(", ")}.
-            </p>
-          )}
-        </div>
-        <p className="mt-3 text-[13px] text-slate sm:hidden">
-          Work: Innoboon Technologies. Degree: B.Tech, AI and ML.
-        </p>
+        <ul className="mt-12 grid gap-4 sm:mt-16 md:grid-cols-3 md:gap-5">
+          {skillGroups.map((group, i) => {
+            const { icon: Icon, span, featured } = LAYOUT[i] ?? { icon: Server, span: "" };
+            return (
+              <li
+                key={group.title}
+                className={cx(
+                  "relative flex flex-col overflow-hidden rounded-3xl p-6 sm:p-8",
+                  span,
+                  featured ? "on-hero bg-hero text-hero-ink" : "bg-mist",
+                )}
+              >
+                {featured && (
+                  /* The hero's timeline grid, faintly, so the core card reads as part of it. */
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,var(--hero-line)_1px,transparent_1px)] [background-size:72px_100%] [mask-image:linear-gradient(to_left,black,transparent_70%)]"
+                  />
+                )}
+                <div className="relative flex items-start gap-4">
+                  <span
+                    aria-hidden="true"
+                    className={cx(
+                      "grid size-11 shrink-0 place-items-center rounded-xl",
+                      featured ? "bg-hero-accent text-hero" : "bg-paper text-accent ring-1 ring-line",
+                    )}
+                  >
+                    <Icon className="size-5" />
+                  </span>
+                  <div>
+                    <h3 className={cx("font-semibold tracking-tight", featured ? "text-2xl" : "text-xl")}>{group.title}</h3>
+                    <p className={cx("mt-1 text-[15px] text-pretty", featured ? "text-hero-muted" : "text-slate")}>
+                      {group.blurb}
+                    </p>
+                  </div>
+                </div>
+
+                <ul aria-label={group.title} className="relative mt-7 flex flex-wrap gap-2">
+                  {group.skills.map((skill) => (
+                    <li
+                      key={skill.name}
+                      className={cx(
+                        "rounded-full px-3.5 py-1.5 text-[15px]",
+                        featured
+                          ? "border border-hero-line bg-white/[0.06] text-hero-ink"
+                          : "border border-line bg-paper text-ink",
+                      )}
+                    >
+                      {skill.name}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            );
+          })}
+        </ul>
       </Container>
     </section>
   );
