@@ -13,6 +13,7 @@ export function Credentials() {
             <p className="text-[15px] text-slate tabular-nums">{education.period}</p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-balance">{education.degree}</h3>
             <p className="mt-1 text-slate">{education.school}</p>
+            <p className="text-[15px] text-slate">{education.location}</p>
             <p className="mt-4 inline-flex rounded-full bg-accent-soft px-3 py-1 text-[15px] font-medium text-ink">
               {education.grade}
             </p>

@@ -394,7 +394,7 @@ export const education = {
   degree: "B.Tech, Artificial Intelligence and Machine Learning",
   grade: "CGPA 8.35",
   period: "2021 – 2025",
-  location: "Tamil Nadu, India",
+  location: "Madurai, Tamil Nadu, India",
 };
 
 export const certifications = [
