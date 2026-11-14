@@ -1,6 +1,8 @@
+import type { CSSProperties } from "react";
 import { Bot, Library, Server, ShieldCheck, type LucideIcon } from "lucide-react";
 
 import { skillGroups } from "@/content/profile";
+import { InView } from "./in-view";
 import { Container, SectionHeading, cx } from "./ui";
 
 /** Per group, in content order: its icon and its place in the grid. */
@@ -25,14 +27,15 @@ export function Skills() {
           lead="Agentic AI first, on a backend built to run it in production."
         />
 
-        <ul className="mt-12 grid gap-4 sm:mt-16 md:grid-cols-3 md:gap-5">
+        <InView as="ul" amount={0.15} className="mt-12 grid gap-4 sm:mt-16 md:grid-cols-3 md:gap-5">
           {skillGroups.map((group, i) => {
             const { icon: Icon, span, featured } = LAYOUT[i] ?? { icon: Server, span: "" };
             return (
               <li
                 key={group.title}
+                style={{ "--i": i } as CSSProperties}
                 className={cx(
-                  "relative flex flex-col overflow-hidden rounded-3xl p-6 sm:p-8",
+                  "reveal relative flex flex-col overflow-hidden rounded-3xl p-6 sm:p-8",
                   span,
                   featured ? "on-hero bg-hero text-hero-ink" : "bg-mist",
                 )}
@@ -80,7 +83,7 @@ export function Skills() {
               </li>
             );
           })}
-        </ul>
+        </InView>
       </Container>
     </section>
   );

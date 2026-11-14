@@ -139,6 +139,167 @@ body {
   animation: pulse-dot 1.2s ease-in-out infinite;
 }
 
+/* ------------------------------------------------------------------ motion
+ * One orchestrated moment (the hero), then motion only where the reader's
+ * own scroll or click causes it. Everything plays once and settles; nothing
+ * loops except the "running" dot while a trace runs.
+ */
+:root {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* fast start, long soft landing */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  interpolate-size: allow-keywords; /* lets <details> animate to height: auto */
+}
+
+/* Hero entrance: each piece rises a little, in reading order (--i). */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+.enter {
+  animation: rise 0.9s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 60ms);
+}
+@keyframes rise-panel {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+}
+.enter-panel {
+  animation: rise-panel 1s var(--ease-out) both;
+  animation-delay: 380ms;
+}
+
+/*
+ * Scroll reveals. Hidden only once the theme script has marked the page as
+ * running JS (data-js), so nothing is lost without it. <InView> sets
+ * data-inview on the group when it scrolls into view.
+ */
+[data-js] .reveal {
+  opacity: 0;
+  translate: 0 16px;
+  transition:
+    opacity 0.8s var(--ease-out),
+    translate 0.8s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+[data-js] [data-inview] .reveal {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Project trace bars draw along the timeline in the order their spans start. */
+[data-js] .trace-draw {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 1s var(--ease-out);
+  transition-delay: calc(var(--d, 0) * 1ms + 150ms);
+}
+[data-js] [data-inview] .trace-draw {
+  transform: scaleX(1);
+}
+[data-js] .trace-row {
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out);
+  transition-delay: calc(var(--d, 0) * 1ms + 100ms);
+}
+[data-js] [data-inview] .trace-row {
+  opacity: 1;
+}
+
+/* Page scroll as a trace: a clay line under the header fills as you read. */
+.scroll-progress {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    display: block;
+    transform-origin: left center;
+    animation: progress linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Theme icon swaps with a quarter turn. */
+@keyframes icon-in {
+  from {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
+  }
+}
+.icon-swap {
+  animation: icon-in 0.45s var(--ease-out) both;
+}
+
+/* Theme switch: the new theme spreads from the toggle (script in site-header). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Screenshot dialog: fades and settles in, and back out. */
+.shot-dialog {
+  opacity: 0;
+  transform: translateY(10px) scale(0.97);
+  transition:
+    opacity 0.3s var(--ease-out),
+    transform 0.45s var(--ease-out),
+    overlay 0.45s allow-discrete,
+    display 0.45s allow-discrete;
+}
+.shot-dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+@starting-style {
+  .shot-dialog[open] {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+}
+.shot-dialog::backdrop {
+  background: rgb(10 18 38 / 0);
+  backdrop-filter: blur(0);
+  transition:
+    background-color 0.35s var(--ease-out),
+    backdrop-filter 0.35s var(--ease-out),
+    overlay 0.45s allow-discrete,
+    display 0.45s allow-discrete;
+}
+.shot-dialog[open]::backdrop {
+  background: rgb(10 18 38 / 0.85);
+  backdrop-filter: blur(6px);
+}
+@starting-style {
+  .shot-dialog[open]::backdrop {
+    background: rgb(10 18 38 / 0);
+    backdrop-filter: blur(0);
+  }
+}
+
+/* "Show more": the hidden bullets open to their height instead of jumping. */
+details.smooth::details-content {
+  block-size: 0;
+  overflow-y: clip;
+  transition:
+    block-size 0.45s var(--ease-out),
+    content-visibility 0.45s allow-discrete;
+}
+details.smooth[open]::details-content {
+  block-size: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -147,7 +308,18 @@ body {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  /* Settled from the start: nothing waits to be revealed. */
+  [data-js] .reveal,
+  [data-js] .trace-row {
+    opacity: 1;
+    translate: 0 0;
+  }
+  [data-js] .trace-draw {
+    transform: none;
   }
 }

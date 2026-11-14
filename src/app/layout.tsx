@@ -59,9 +59,10 @@ export const viewport: Viewport = {
 
 /**
  * Sets the theme before the first paint (saved choice, else the system), so
- * the page never flashes the wrong colours.
+ * the page never flashes the wrong colours, and marks the page as running JS
+ * (data-js) so scroll reveals only hide content that will be revealed.
  */
-const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t}catch(e){}})();`;
+const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t}catch(e){}document.documentElement.dataset.js="";})();`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

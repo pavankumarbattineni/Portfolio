@@ -11,6 +11,8 @@ const RUN_END = Math.max(...heroTrace.map((s) => s.start + s.duration));
 const TYPE_START = RUN_END + 150;
 const MS_PER_CHAR = 18;
 const END = TYPE_START + heroOutput.length * MS_PER_CHAR;
+/** How long the panel takes to appear on first load, before the run starts. */
+const ENTRANCE_MS = 900;
 /** Axis ticks every half second. */
 const TICKS = Array.from({ length: Math.floor(RUN_END / 500) + 1 }, (_, i) => i * 500);
 
@@ -45,9 +47,10 @@ export function HeroTrace() {
   useEffect(() => {
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
-    const startedAt = performance.now();
+    // The first run waits for the panel's entrance (globals.css .enter); Replay starts at once.
+    const startedAt = performance.now() + (run === 0 ? ENTRANCE_MS : 0);
     const tick = (now: number) => {
-      const elapsed = reduce ? END : now - startedAt;
+      const elapsed = reduce ? END : Math.max(0, now - startedAt);
       setT(Math.min(elapsed, END));
       if (elapsed < END) frame = requestAnimationFrame(tick);
     };

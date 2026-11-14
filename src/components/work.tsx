@@ -1,6 +1,8 @@
+import type { CSSProperties } from "react";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 
 import { projects, type Project } from "@/content/profile";
+import { InView } from "./in-view";
 import { Screens } from "./screens";
 import { Chip, Container, SectionHeading, cx } from "./ui";
 
@@ -41,7 +43,7 @@ function ProductMark({ project }: { project: Project }) {
  */
 function ProjectTrace({ project }: { project: Project }) {
   return (
-    <figure className="on-hero overflow-hidden rounded-2xl border border-hero-line bg-hero text-hero-ink">
+    <InView as="figure" amount={0.35} className="on-hero overflow-hidden rounded-2xl border border-hero-line bg-hero text-hero-ink">
       <div className="flex items-center justify-between gap-3 border-b border-hero-line px-4 py-3 sm:px-5">
         <p className="text-[13px] text-hero-muted">Request trace</p>
         <p className="font-mono text-[12px] text-hero-muted">{project.trace.length} spans</p>
@@ -50,7 +52,8 @@ function ProjectTrace({ project }: { project: Project }) {
         {project.trace.map((span) => (
           <li
             key={span.name}
-            className="grid grid-cols-1 items-center gap-x-3 gap-y-2 rounded-lg px-2 py-1.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
+            style={{ "--d": span.start * 14 } as CSSProperties}
+            className="trace-row grid grid-cols-1 items-center gap-x-3 gap-y-2 rounded-lg px-2 py-1.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
           >
             <div className="min-w-0" style={{ paddingLeft: `${span.depth * 0.7}rem` }}>
               <p className="flex items-center gap-1.5 font-mono text-[12.5px] text-hero-ink">
@@ -65,7 +68,7 @@ function ProjectTrace({ project }: { project: Project }) {
             <div className="relative ml-3 h-2 rounded-full bg-white/[0.05] sm:ml-0" aria-hidden="true">
               <span
                 className={cx(
-                  "absolute inset-y-0 rounded-full",
+                  "trace-draw absolute inset-y-0 rounded-full",
                   span.depth === 0 ? "bg-hero-accent" : "bg-hero-muted/60",
                 )}
                 style={{ left: `${span.start}%`, width: `${span.end - span.start}%` }}
@@ -77,7 +80,7 @@ function ProjectTrace({ project }: { project: Project }) {
       <figcaption className="border-t border-hero-line px-4 py-3 text-[13px] text-hero-muted sm:px-5">
         {project.traceCaption}
       </figcaption>
-    </figure>
+    </InView>
   );
 }
 
@@ -118,7 +121,7 @@ function ProjectStudy({ project, flip }: { project: Project; flip: boolean }) {
             href={project.live}
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-6 inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2.5 font-medium text-on-accent transition-colors hover:bg-accent-hover"
+            className="group mt-6 inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2.5 font-medium text-on-accent transition hover:bg-accent-hover active:scale-[0.98]"
           >
             Open {project.name}
             <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
@@ -134,7 +137,7 @@ function ProjectStudy({ project, flip }: { project: Project; flip: boolean }) {
             ))}
           </ul>
           {more.length > 0 && (
-            <details className="group mt-3">
+            <details className="smooth group mt-3">
               <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded-md text-[15px] font-medium text-accent hover:text-accent-hover [&::-webkit-details-marker]:hidden">
                 <span className="group-open:hidden">Show {more.length} more</span>
                 <span className="hidden group-open:inline">Show less</span>

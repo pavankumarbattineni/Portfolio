@@ -1,4 +1,7 @@
+import type { CSSProperties } from "react";
+
 import { experience } from "@/content/profile";
+import { InView } from "./in-view";
 import { Chip, Container, SectionHeading } from "./ui";
 
 export function Experience() {
@@ -23,9 +26,9 @@ export function Experience() {
             </div>
           </div>
 
-          <ul className="mt-10 grid gap-8 md:grid-cols-3 md:gap-0 md:divide-x md:divide-line">
-            {experience.highlights.map((item) => (
-              <li key={item.unit} className="md:px-8 md:first:pl-0 md:last:pr-0">
+          <InView as="ul" amount={0.3} className="mt-10 grid gap-8 md:grid-cols-3 md:gap-0 md:divide-x md:divide-line">
+            {experience.highlights.map((item, i) => (
+              <li key={item.unit} style={{ "--i": i } as CSSProperties} className="reveal md:px-8 md:first:pl-0 md:last:pr-0">
                 <p className="flex items-baseline gap-2">
                   <span className="text-5xl font-semibold tracking-[-0.03em] tabular-nums">{item.metric}</span>
                   <span className="font-medium text-accent">{item.unit}</span>
@@ -33,7 +36,7 @@ export function Experience() {
                 <p className="mt-3 text-slate text-pretty">{item.text}</p>
               </li>
             ))}
-          </ul>
+          </InView>
 
           <h4 className="mt-14 text-lg font-semibold">Projects at {experience.company.split(" ")[0]}</h4>
           <ol className="mt-6 space-y-10 border-l border-line pl-6 sm:pl-8">

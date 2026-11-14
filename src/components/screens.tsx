@@ -1,15 +1,17 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { Maximize2, X } from "lucide-react";
 
 import type { Screen } from "@/content/profile";
+import { InView } from "./in-view";
 import { cx } from "./ui";
 
 /**
  * Screenshots of a live app: the first large, the others beside it. Any of
- * them opens full size in a dialog (Esc or a click outside closes it).
+ * them opens full size in a dialog (Esc or a click outside closes it). The
+ * dialog keeps its picture after closing so it can fade out with it.
  */
 export function Screens({ name, screens }: { name: string; screens: Screen[] }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -22,9 +24,13 @@ export function Screens({ name, screens }: { name: string; screens: Screen[] }) 
 
   return (
     <>
-      <ul aria-label={`${name} screenshots`} className="grid gap-4 lg:grid-cols-3 lg:grid-rows-2 lg:gap-5">
+      <InView as="ul" amount={0.15} aria-label={`${name} screenshots`} className="grid gap-4 lg:grid-cols-3 lg:grid-rows-2 lg:gap-5">
         {screens.map((screen, i) => (
-          <li key={screen.src} className={cx("min-w-0", i === 0 && "lg:col-span-2 lg:row-span-2")}>
+          <li
+            key={screen.src}
+            style={{ "--i": i } as CSSProperties}
+            className={cx("reveal min-w-0", i === 0 && "lg:col-span-2 lg:row-span-2")}
+          >
             <figure className="flex h-full flex-col">
               <button
                 type="button"
@@ -50,17 +56,16 @@ export function Screens({ name, screens }: { name: string; screens: Screen[] }) 
             </figure>
           </li>
         ))}
-      </ul>
+      </InView>
 
       <dialog
         ref={dialogRef}
         aria-label={open?.alt ?? `${name} screenshot`}
-        onClose={() => setOpen(null)}
         onClick={(event) => {
           // Anywhere but the screenshot itself closes it.
           if (!(event.target instanceof HTMLImageElement)) dialogRef.current?.close();
         }}
-        className="m-auto max-h-[92dvh] w-[min(96vw,1400px)] max-w-none overflow-visible bg-transparent p-0 backdrop:bg-[#0a1226]/85 backdrop:backdrop-blur-sm"
+        className="shot-dialog m-auto max-h-[92dvh] w-[min(96vw,1400px)] max-w-none overflow-visible bg-transparent p-0"
       >
         {open && (
           <figure className="relative">
