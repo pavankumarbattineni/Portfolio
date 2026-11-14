@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/*
+ * Palette: Deep Navy, White and Clay, plus a mist surface and a slate for
+ * secondary text. Clay is only for things you can act on and things that are
+ * running. Every text pairing below passes WCAG AA.
+ */
+:root {
+  --paper: #ffffff;
+  --mist: #f3f5f9;
+  --ink: #13213f;
+  --slate: #5b6478;
+  --line: #dce1ea;
+  --accent: #c2643f; /* 5.3:1 on white */
+  --accent-hover: #a5502e;
+  --accent-soft: #f8ebe4;
+  --on-accent: #ffffff;
+  --hero: #13213f;
+  --hero-raised: #1b2b4f;
+  --hero-ink: #f4f6fa;
+  --hero-muted: #aab4c8; /* 7.6:1 on hero */
+  --hero-line: rgb(255 255 255 / 0.12);
+  --hero-accent: #e08a62; /* 6.1:1 on hero */
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --paper: #0d1730;
+  --mist: #13213f;
+  --ink: #e9edf5;
+  --slate: #a3acbf;
+  --line: #26365a;
+  --accent: #e08a62;
+  --accent-hover: #eba07d;
+  --accent-soft: #2e2a3a;
+  --on-accent: #13213f;
+  --hero: #0a1226;
+  --hero-raised: #13213f;
+  --hero-line: rgb(255 255 255 / 0.1);
+  color-scheme: dark;
+}
+
+/* Before the theme script runs (or without it): follow the system. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --paper: #0d1730;
+    --mist: #13213f;
+    --ink: #e9edf5;
+    --slate: #a3acbf;
+    --line: #26365a;
+    --accent: #e08a62;
+    --accent-hover: #eba07d;
+    --accent-soft: #2e2a3a;
+  --on-accent: #13213f;
+    --hero: #0a1226;
+    --hero-raised: #13213f;
+    --hero-line: rgb(255 255 255 / 0.1);
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-mist: var(--mist);
+  --color-ink: var(--ink);
+  --color-slate: var(--slate);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-hero: var(--hero);
+  --color-hero-raised: var(--hero-raised);
+  --color-hero-ink: var(--hero-ink);
+  --color-hero-muted: var(--hero-muted);
+  --color-hero-line: var(--hero-line);
+  --color-hero-accent: var(--hero-accent);
+  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.on-hero :focus-visible {
+  outline-color: var(--hero-accent);
+}
+
+/* Links in running text. */
+.prose-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 150ms ease;
+}
+.prose-link:hover {
+  color: var(--accent-hover);
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+.caret {
+  animation: caret 1s steps(1) infinite;
+}
+
+@keyframes pulse-dot {
+  50% {
+    opacity: 0.35;
+  }
+}
+.running-dot {
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
