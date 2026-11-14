@@ -125,6 +125,8 @@ export interface Project {
   tagline: string;
   period: string;
   live: string;
+  /** Where the project came from, shown under the tagline. */
+  origin?: string;
   problem: string;
   built: string[];
   hardPart: { title: string; body: string };
@@ -179,8 +181,10 @@ export const projects: Project[] = [
     id: "abyss",
     name: "Abyss",
     tagline: "A no-code platform for teams of AI agents",
-    period: "Nov 2026",
+    period: "Jun 2026 – Nov 2026",
     live: "https://abyss-fleet.vercel.app",
+    origin:
+      "Abyss started as Thinkloop, the proof of concept I built at Innoboon. I took it over as my own product, renamed it, and rebuilt and extended it end to end.",
     problem:
       "Building an agent usually means writing orchestration code. In Abyss you describe what an agent does, connect the tools it needs over MCP, and give it up to five specialists that work in parallel, while sensitive actions wait for your approval.",
     built: [
@@ -259,6 +263,7 @@ export const experience = {
         "Designed and built a multi-agent backend end to end as the agent-execution platform powering TickerLens' Investor Desk.",
         "Resumable SSE streaming (Last-Event-ID), tool-approval gating, and per-run token and cost tracking across 3 providers.",
       ],
+      continuedAs: { label: "Now continued as Abyss, my own product", href: "#abyss" },
       stack: ["Python", "FastAPI", "PostgreSQL", "LangGraph", "LiteLLM"],
     },
   ],

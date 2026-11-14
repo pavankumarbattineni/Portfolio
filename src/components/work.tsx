@@ -70,6 +70,11 @@ function ProjectStudy({ project, flip }: { project: Project; flip: boolean }) {
             {project.name}
           </h3>
           <p className="mt-2 text-xl text-slate text-balance">{project.tagline}</p>
+          {project.origin && (
+            <p className="mt-4 max-w-xl rounded-xl bg-accent-soft px-4 py-3 text-[15px] text-ink text-pretty">
+              {project.origin}
+            </p>
+          )}
 
           <a
             href={project.live}

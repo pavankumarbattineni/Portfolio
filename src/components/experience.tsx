@@ -61,6 +61,11 @@ export function Experience() {
                     </li>
                   ))}
                 </ul>
+                {project.continuedAs && (
+                  <a href={project.continuedAs.href} className="prose-link mt-4 inline-block text-[15px]">
+                    {project.continuedAs.label}
+                  </a>
+                )}
               </li>
             ))}
           </ol>
