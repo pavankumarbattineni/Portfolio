@@ -82,7 +82,7 @@ export const heroTrace: TraceSpan[] = [
     explain: "Reorders the retrieved passages so the most relevant ones reach the model first.",
   },
   {
-    name: "mcp.github",
+    name: "mcp.langchain",
     kind: "tool",
     depth: 1,
     start: 520,

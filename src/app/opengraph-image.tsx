@@ -10,7 +10,7 @@ const SPANS = [
   { name: "lead_agent", left: 0, width: 100, depth: 0 },
   { name: "plan", left: 2, width: 15, depth: 1 },
   { name: "hybrid_search", left: 18, width: 20, depth: 1 },
-  { name: "mcp.github", left: 20, width: 29, depth: 1 },
+  { name: "mcp.langchain", left: 20, width: 29, depth: 1 },
   { name: "stream_answer", left: 58, width: 42, depth: 1 },
 ];
 
