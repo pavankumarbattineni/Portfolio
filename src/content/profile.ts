@@ -149,7 +149,7 @@ export const projects: Project[] = [
       "A multi-tenant RAG backend with Firebase JWT sign-in and roles that separate personal documents from organization-wide knowledge.",
       "A LangGraph retrieval workflow: dense (Gemini) and sparse embeddings searched together on Pinecone, then reranked before the model answers.",
       "Resumable SSE streaming, so an answer survives a refresh or a dropped connection.",
-      "A Tracing page built on LangSmith that shows each user their own runs as a span waterfall.",
+      "LangSmith tracing across retrieval, reranking and model calls, synced per user so each person can inspect their own runs.",
       "Docker and Docker Compose, plus GitHub Actions CI/CD with a gated, staged deploy to Render, Vercel and Neon.",
     ],
     hardPart: {
@@ -161,9 +161,9 @@ export const projects: Project[] = [
       { value: "2", label: "retrieval signals, dense and sparse" },
       { value: "3", label: "deploy targets: Render, Vercel, Neon" },
     ],
-    stack: ["Python", "FastAPI", "LangGraph", "LangChain", "Pinecone", "PostgreSQL", "Firebase", "Docker", "GitHub Actions", "Next.js"],
+    stack: ["Python", "FastAPI", "LangGraph", "LangChain", "Pinecone", "PostgreSQL", "Firebase", "Docker", "GitHub Actions"],
     flow: [
-      { label: "Question", detail: "Next.js client, Firebase sign-in" },
+      { label: "Question", detail: "client with Firebase sign-in" },
       { label: "FastAPI", detail: "JWT check, tenant and role scope" },
       {
         label: "Hybrid retrieval",
@@ -191,19 +191,19 @@ export const projects: Project[] = [
       "A LangGraph lead agent that delegates to up to five specialists running in parallel, with MCP tool connections and human approval before sensitive tools run.",
       "Bring-your-own-key access to OpenAI, Anthropic and Gemini models, with token and cost tracking per run.",
       "Long conversations that stay within the model's context window: earlier turns are trimmed to question and answer, then summarized at the start of a turn when they grow too large.",
-      "Live previews of agent-written HTML and React apps, rendered right in the chat.",
+      "Runs that pause for human approval and resume from LangGraph checkpoints once a decision is made.",
       "Resumable streams, LangSmith tracing, Profile and account deletion, and CI/CD to Render, Vercel and Neon.",
     ],
     hardPart: {
-      title: "Running code a model wrote, safely",
-      body: "Previews run in a sandboxed iframe with an opaque origin and a Content Security Policy that blocks all network access, so agent-written apps can't read the session, call out or navigate the page.",
+      title: "Long conversations that never overflow the model",
+      body: "Earlier turns are sent as question and answer only, without tool calls or reasoning. When history nears 70% of the model's context window (capped at 40k tokens), it is summarized at the start of the next turn, so the agent keeps the facts without running out of room.",
     },
     facts: [
       { value: "5", label: "parallel specialists per agent" },
       { value: "3", label: "LLM providers, your own keys" },
       { value: "65", label: "backend tests" },
     ],
-    stack: ["Python", "FastAPI", "LangGraph", "LangChain", "MCP", "PostgreSQL", "Docker", "GitHub Actions", "Next.js"],
+    stack: ["Python", "FastAPI", "LangGraph", "LangChain", "MCP", "PostgreSQL", "Docker", "GitHub Actions"],
     flow: [
       { label: "Request", detail: "chat or API" },
       { label: "Lead agent", detail: "plans and delegates" },

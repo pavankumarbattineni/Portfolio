@@ -4,10 +4,6 @@ Personal site of Pavan Kumar Battineni, Agentic AI Engineer.
 
 The hero is a live agent trace: a run answering "Who is Pavan?", drawn as a span waterfall like the Tracing pages in [Trench](https://trenchai.vercel.app) and [Abyss](https://abyss-fleet.vercel.app).
 
-## Stack
-
-Next.js 16 (App Router, static), React 19, TypeScript, Tailwind CSS 4. Fonts: Schibsted Grotesk and IBM Plex Mono.
-
 ## Run locally
 
 ```bash
@@ -23,4 +19,4 @@ Everything the site says lives in [`src/content/profile.ts`](src/content/profile
 
 ## Deploy
 
-Import the repo in Vercel (framework preset: Next.js, no environment variables needed). Vercel's production URL is used automatically for metadata, the sitemap and the link preview image.
+Import the repo in Vercel (the framework is detected automatically; no environment variables needed). Vercel's production URL is used automatically for metadata, the sitemap and the link preview image.

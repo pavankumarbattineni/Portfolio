@@ -84,7 +84,6 @@ export function Contact() {
         <Container className="flex flex-col gap-2 py-6 text-[14px] text-hero-muted sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 {profile.name}</p>
           <p>
-            Built with Next.js and Tailwind CSS.{" "}
             <a href={profile.links.source} target="_blank" rel="noopener noreferrer" className="text-hero-ink underline decoration-hero-line underline-offset-4 hover:decoration-hero-muted">
               View source
             </a>
