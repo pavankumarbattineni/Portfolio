@@ -45,7 +45,9 @@ export function HeroTrace() {
   const [selected, setSelected] = useState<number | null>(null);
 
   useEffect(() => {
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Reduced motion skips the automatic run on load, but Replay is the reader
+    // asking to watch it, so it always plays.
+    const reduce = run === 0 && matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
     // The first run waits for the panel's entrance (globals.css .enter); Replay starts at once.
     const startedAt = performance.now() + (run === 0 ? ENTRANCE_MS : 0);
