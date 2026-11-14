@@ -9,10 +9,29 @@ export function Container({ className, ...props }: ComponentProps<"div">) {
   return <div className={cx("mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8", className)} {...props} />;
 }
 
-export function SectionHeading({ id, title, lead }: { id: string; title: string; lead?: ReactNode }) {
+export function SectionHeading({
+  id,
+  title,
+  lead,
+  size = "md",
+}: {
+  id: string;
+  title: string;
+  lead?: ReactNode;
+  /** "lg" marks the page's main section. */
+  size?: "md" | "lg";
+}) {
   return (
     <header className="max-w-2xl">
-      <h2 id={id} className="text-[2rem] leading-tight font-semibold tracking-[-0.02em] text-balance sm:text-[2.5rem]">
+      <h2
+        id={id}
+        className={cx(
+          "leading-tight font-semibold text-balance",
+          size === "lg"
+            ? "text-[2.5rem] leading-[1.02] tracking-[-0.035em] sm:text-6xl lg:text-7xl"
+            : "text-[2rem] tracking-[-0.02em] sm:text-[2.5rem]",
+        )}
+      >
         {title}
       </h2>
       {lead && <p className="mt-3 text-lg text-slate text-pretty">{lead}</p>}

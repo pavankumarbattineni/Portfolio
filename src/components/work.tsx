@@ -1,75 +1,112 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronDown } from "lucide-react";
 
-import { projects, type Project, type Stage } from "@/content/profile";
+import { projects, type Project } from "@/content/profile";
 import { Chip, Container, SectionHeading, cx } from "./ui";
 
-/** A short connector between stages. */
-function Connector() {
-  return (
-    <div aria-hidden="true" className="flex justify-center py-1">
-      <svg width="10" height="22" viewBox="0 0 10 22" className="text-slate/60">
-        <path d="M5 0v17" stroke="currentColor" strokeWidth="1.25" />
-        <path d="M1.5 14 5 18.5 8.5 14" fill="none" stroke="currentColor" strokeWidth="1.25" />
-      </svg>
-    </div>
-  );
-}
+/** Bullets shown before "More details". */
+const VISIBLE_BULLETS = 3;
 
-function StageBox({ label, detail, emphasis }: { label: string; detail?: string; emphasis?: boolean }) {
+/** Each product's own mark on its own tile, as the apps draw it. */
+function ProductMark({ project }: { project: Project }) {
+  const { tile, ink, dot } = project.brand;
   return (
-    <div
-      className={cx(
-        "rounded-xl border bg-paper px-4 py-3 text-center",
-        emphasis ? "border-accent/50" : "border-line",
-      )}
+    <span
+      aria-hidden="true"
+      className="grid size-12 shrink-0 place-items-center rounded-[13px] sm:size-14 sm:rounded-[15px]"
+      style={{ background: tile, color: ink }}
     >
-      <p className="text-[15px] leading-snug font-medium">{label}</p>
-      {detail && <p className="mt-0.5 text-[13px] leading-snug text-slate">{detail}</p>}
-    </div>
+      <svg viewBox="0 0 40 40" className="size-[62%]">
+        {project.id === "trench" ? (
+          <>
+            <rect x="6" y="7" width="28" height="6" rx="3" fill="currentColor" />
+            <rect x="6" y="17" width="20" height="6" rx="3" fill="currentColor" />
+            <rect x="6" y="27" width="12" height="6" rx="3" fill="currentColor" />
+          </>
+        ) : (
+          <>
+            <circle cx="20" cy="18.5" r="11.5" fill="none" stroke="currentColor" strokeWidth="3.6" />
+            <circle cx="20" cy="22" r="6.4" fill="currentColor" />
+            <circle cx="20" cy="24.2" r="2.3" fill={dot} />
+          </>
+        )}
+      </svg>
+    </span>
   );
 }
 
-/** How one request moves through the system, top to bottom. */
-function Flow({ stages, caption }: { stages: Stage[]; caption: string }) {
+/**
+ * The project's request as a trace, in the hero's visual language: one row
+ * per span, bars placed on the run's timeline so order and overlap show.
+ */
+function ProjectTrace({ project }: { project: Project }) {
   return (
-    <figure className="rounded-2xl bg-mist p-4 sm:p-6">
-      <ol aria-label="Request flow">
-        {stages.map((stage, i) => (
-          <li key={stage.label}>
-            {i > 0 && <Connector />}
-            {stage.parallel ? (
-              <div className="rounded-xl border border-dashed border-slate/40 p-2.5 sm:p-3">
-                <p className="mb-2 text-center text-[13px] font-medium text-slate">{stage.label}</p>
-                <ul className={cx("grid gap-2", stage.parallel.length === 3 ? "grid-cols-3" : "grid-cols-2")}>
-                  {stage.parallel.map((step) => (
-                    <li key={step.label}>
-                      <StageBox label={step.label} detail={step.detail} emphasis />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <StageBox label={stage.label} detail={stage.detail} />
-            )}
+    <figure className="on-hero overflow-hidden rounded-2xl border border-hero-line bg-hero text-hero-ink">
+      <div className="flex items-center justify-between gap-3 border-b border-hero-line px-4 py-3 sm:px-5">
+        <p className="text-[13px] text-hero-muted">Request trace</p>
+        <p className="font-mono text-[12px] text-hero-muted">{project.trace.length} spans</p>
+      </div>
+      <ol className="space-y-1 px-2 py-3 sm:px-3">
+        {project.trace.map((span) => (
+          <li
+            key={span.name}
+            className="grid grid-cols-1 items-center gap-x-3 gap-y-2 rounded-lg px-2 py-1.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
+          >
+            <div className="min-w-0" style={{ paddingLeft: `${span.depth * 0.7}rem` }}>
+              <p className="flex items-center gap-1.5 font-mono text-[12.5px] text-hero-ink">
+                <span
+                  aria-hidden="true"
+                  className={cx("size-1.5 shrink-0 rounded-full", span.depth === 0 ? "bg-hero-accent" : "bg-hero-muted")}
+                />
+                <span className="truncate">{span.name}</span>
+              </p>
+              <p className="mt-0.5 pl-3 text-[12px] leading-snug text-hero-muted">{span.note}</p>
+            </div>
+            <div className="relative ml-3 h-2 rounded-full bg-white/[0.05] sm:ml-0" aria-hidden="true">
+              <span
+                className={cx(
+                  "absolute inset-y-0 rounded-full",
+                  span.depth === 0 ? "bg-hero-accent" : "bg-hero-muted/60",
+                )}
+                style={{ left: `${span.start}%`, width: `${span.end - span.start}%` }}
+              />
+            </div>
           </li>
         ))}
       </ol>
-      <figcaption className="mt-4 text-center text-[13px] text-slate">{caption}</figcaption>
+      <figcaption className="border-t border-hero-line px-4 py-3 text-[13px] text-hero-muted sm:px-5">
+        {project.traceCaption}
+      </figcaption>
     </figure>
+  );
+}
+
+function Bullet({ children }: { children: string }) {
+  return (
+    <li className="flex gap-3 text-pretty">
+      <span aria-hidden="true" className="mt-[0.7em] h-px w-3 shrink-0 bg-accent" />
+      <span>{children}</span>
+    </li>
   );
 }
 
 function ProjectStudy({ project, flip }: { project: Project; flip: boolean }) {
   const titleId = `${project.id}-title`;
+  const shown = project.built.slice(0, VISIBLE_BULLETS);
+  const more = project.built.slice(VISIBLE_BULLETS);
   return (
     <article id={project.id} aria-labelledby={titleId} className="scroll-mt-20 border-t border-line pt-12 sm:pt-16">
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
         <div className={cx(flip && "lg:order-2")}>
-          <p className="text-[15px] text-slate">{project.period}</p>
-          <h3 id={titleId} className="mt-1 text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">
-            {project.name}
-          </h3>
-          <p className="mt-2 text-xl text-slate text-balance">{project.tagline}</p>
+          <div className="flex items-center gap-4">
+            <ProductMark project={project} />
+            <div>
+              <h3 id={titleId} className="text-4xl leading-none font-semibold tracking-[-0.03em] sm:text-5xl">
+                {project.name}
+              </h3>
+              <p className="mt-1.5 text-[15px] text-slate tabular-nums">{project.period}</p>
+            </div>
+          </div>
+          <p className="mt-5 text-xl text-slate text-balance">{project.tagline}</p>
           {project.origin && (
             <p className="mt-4 max-w-xl rounded-xl bg-accent-soft px-4 py-3 text-[15px] text-ink text-pretty">
               {project.origin}
@@ -80,7 +117,7 @@ function ProjectStudy({ project, flip }: { project: Project; flip: boolean }) {
             href={project.live}
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-5 inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2.5 font-medium text-on-accent transition-colors hover:bg-accent-hover"
+            className="group mt-6 inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2.5 font-medium text-on-accent transition-colors hover:bg-accent-hover"
           >
             Open {project.name}
             <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
@@ -91,13 +128,24 @@ function ProjectStudy({ project, flip }: { project: Project; flip: boolean }) {
 
           <h4 className="mt-8 text-lg font-semibold">What I built</h4>
           <ul className="mt-3 space-y-3">
-            {project.built.map((item) => (
-              <li key={item} className="flex gap-3 text-pretty">
-                <span aria-hidden="true" className="mt-[0.7em] h-px w-3 shrink-0 bg-accent" />
-                <span>{item}</span>
-              </li>
+            {shown.map((item) => (
+              <Bullet key={item}>{item}</Bullet>
             ))}
           </ul>
+          {more.length > 0 && (
+            <details className="group mt-3">
+              <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded-md text-[15px] font-medium text-accent hover:text-accent-hover [&::-webkit-details-marker]:hidden">
+                <span className="group-open:hidden">Show {more.length} more</span>
+                <span className="hidden group-open:inline">Show less</span>
+                <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <ul className="mt-3 space-y-3">
+                {more.map((item) => (
+                  <Bullet key={item}>{item}</Bullet>
+                ))}
+              </ul>
+            </details>
+          )}
 
           <ul aria-label="Tech stack" className="mt-8 flex flex-wrap gap-2">
             {project.stack.map((tech) => (
@@ -109,7 +157,7 @@ function ProjectStudy({ project, flip }: { project: Project; flip: boolean }) {
         </div>
 
         <div className={cx("space-y-6 lg:sticky lg:top-24 lg:self-start", flip && "lg:order-1")}>
-          <Flow stages={project.flow} caption={project.flowCaption} />
+          <ProjectTrace project={project} />
 
           <dl className="grid grid-cols-3 divide-x divide-line rounded-2xl border border-line">
             {project.facts.map((fact) => (
@@ -137,6 +185,7 @@ export function Work() {
       <Container>
         <SectionHeading
           id="work-title"
+          size="lg"
           title="Selected work"
           lead="Two products I designed, built and deployed end to end. Both are live; open them and try them."
         />

@@ -112,11 +112,16 @@ export const heroOutput =
 
 /* ------------------------------------------------------------- projects */
 
-export interface Stage {
-  label: string;
-  detail?: string;
-  /** Parallel steps shown side by side. */
-  parallel?: { label: string; detail?: string }[];
+/**
+ * One step of a project's request trace. start/end are positions on the run's
+ * timeline (0-100): they show order and overlap, not measured timings.
+ */
+export interface ProjectSpan {
+  name: string;
+  note: string;
+  depth: number;
+  start: number;
+  end: number;
 }
 
 export interface Project {
@@ -132,8 +137,10 @@ export interface Project {
   hardPart: { title: string; body: string };
   facts: { value: string; label: string }[];
   stack: string[];
-  flow: Stage[];
-  flowCaption: string;
+  /** Product mark colours, from each app's own theme. */
+  brand: { tile: string; ink: string; dot?: string };
+  trace: ProjectSpan[];
+  traceCaption: string;
 }
 
 export const projects: Project[] = [
@@ -162,20 +169,17 @@ export const projects: Project[] = [
       { value: "3", label: "deploy targets: Render, Vercel, Neon" },
     ],
     stack: ["Python", "FastAPI", "LangGraph", "LangChain", "Pinecone", "PostgreSQL", "Firebase", "Docker", "GitHub Actions"],
-    flow: [
-      { label: "Question", detail: "client with Firebase sign-in" },
-      { label: "FastAPI", detail: "JWT check, tenant and role scope" },
-      {
-        label: "Hybrid retrieval",
-        parallel: [
-          { label: "Dense", detail: "Gemini embeddings" },
-          { label: "Sparse", detail: "keyword weights" },
-        ],
-      },
-      { label: "Rerank", detail: "best passages first" },
-      { label: "Answer with citations", detail: "streamed over resumable SSE" },
+    brand: { tile: "#d3fb52", ink: "#052326" },
+    trace: [
+      { name: "chat_request", note: "POST /chat/threads/{id}/messages: JWT, tenant and role scope", depth: 0, start: 0, end: 100 },
+      { name: "retrieve", note: "LangGraph retrieval node", depth: 1, start: 3, end: 42 },
+      { name: "dense_search", note: "Gemini embeddings on Pinecone", depth: 2, start: 5, end: 30 },
+      { name: "sparse_search", note: "keyword weights, same index", depth: 2, start: 5, end: 24 },
+      { name: "rerank", note: "best passages first", depth: 2, start: 31, end: 42 },
+      { name: "generate", note: "answer with citations", depth: 1, start: 43, end: 98 },
+      { name: "sse_stream", note: "resumable with Last-Event-ID", depth: 2, start: 47, end: 98 },
     ],
-    flowCaption: "One question through Trench. Every step is traced in LangSmith.",
+    traceCaption: "One question through Trench. Dense and sparse search run side by side; every span is recorded in LangSmith.",
   },
   {
     id: "abyss",
@@ -190,7 +194,6 @@ export const projects: Project[] = [
     built: [
       "A LangGraph lead agent that delegates to up to five specialists running in parallel, with MCP tool connections and human approval before sensitive tools run.",
       "Bring-your-own-key access to OpenAI, Anthropic and Gemini models, with token and cost tracking per run.",
-      "Long conversations that stay within the model's context window: earlier turns are trimmed to question and answer, then summarized at the start of a turn when they grow too large.",
       "Runs that pause for human approval and resume from LangGraph checkpoints once a decision is made.",
       "Resumable streams, LangSmith tracing, Profile and account deletion, and CI/CD to Render, Vercel and Neon.",
     ],
@@ -204,21 +207,17 @@ export const projects: Project[] = [
       { value: "65", label: "backend tests" },
     ],
     stack: ["Python", "FastAPI", "LangGraph", "LangChain", "MCP", "PostgreSQL", "Docker", "GitHub Actions"],
-    flow: [
-      { label: "Request", detail: "chat or API" },
-      { label: "Lead agent", detail: "plans and delegates" },
-      {
-        label: "Specialists in parallel",
-        parallel: [
-          { label: "Research" },
-          { label: "Analysis" },
-          { label: "Writing" },
-        ],
-      },
-      { label: "MCP tools", detail: "sensitive calls wait for approval" },
-      { label: "Answer", detail: "streamed, traced, cost tracked" },
+    brand: { tile: "#9caf88", ink: "#1d2719", dot: "#e8412c" },
+    trace: [
+      { name: "chat_request", note: "POST /threads/{id}/messages, from chat or an API key", depth: 0, start: 0, end: 100 },
+      { name: "lead_agent", note: "plans and delegates", depth: 1, start: 2, end: 98 },
+      { name: "specialist.research", note: "runs in parallel", depth: 2, start: 9, end: 52 },
+      { name: "mcp.tool_call", note: "sensitive calls wait for approval", depth: 3, start: 18, end: 40 },
+      { name: "specialist.analysis", note: "runs in parallel", depth: 2, start: 9, end: 46 },
+      { name: "specialist.writing", note: "runs in parallel", depth: 2, start: 9, end: 58 },
+      { name: "stream_answer", note: "streamed, traced, cost tracked", depth: 2, start: 61, end: 98 },
     ],
-    flowCaption: "One request through Abyss. Specialists are whatever the agent's builder defines.",
+    traceCaption: "One request through Abyss. Specialists are whatever the agent's builder defines, up to five at once.",
   },
 ];
 
