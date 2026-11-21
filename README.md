@@ -2,7 +2,7 @@
 
 Personal site of Pavan Kumar Battineni, Agentic AI Engineer.
 
-The whole site sits on fiber-optic light: a WebGL shader (`src/components/light-field.tsx`) draws glowing strands with light travelling along them, shaped as a radiant burst at the top, aurora curtains through the middle and flowing threads at Contact. The hero shows the agent stack Pavan builds with, wired to his mark, with pulses running out to each part (`src/components/hero-constellation.tsx`).
+The whole site sits on a living particle galaxy: a WebGL shader (`src/components/light-field.tsx`) places tens of thousands of points of light that swirl into a spiral galaxy behind the hero card, part around the pointer, and turn into a breathing sphere through the middle of the page and a sea of stardust at Contact. The hero shows the agent stack Pavan builds with, wired to his mark at the galaxy's core, with pulses running out to each part (`src/components/hero-constellation.tsx`).
 
 ## Run locally
 

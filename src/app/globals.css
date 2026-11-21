@@ -25,7 +25,7 @@
 }
 
 :root[data-theme="dark"] {
-  /* Reading surfaces are frosted glass over the fiber-optic backdrop. */
+  /* Reading surfaces are frosted glass over the galaxy backdrop. */
   --paper: rgb(10 18 40 / 0.74);
   --mist: rgb(17 29 58 / 0.66);
   --ink: #e9edf5;
@@ -89,7 +89,7 @@ html {
 }
 
 body {
-  /* Transparent: the fixed fiber-optic layer (LightField) shows through. */
+  /* Transparent: the fixed particle galaxy (LightField) shows through. */
   background: transparent;
   color: var(--ink);
   font-family: var(--font-sans);
@@ -126,7 +126,7 @@ body {
 }
 
 /* ------------------------------------------------------------------ motion
- * The fiber-optic backdrop lives and flows the whole time, quietly. Content
+ * The galaxy backdrop lives and turns the whole time, quietly. Content
  * moves once: the hero's entrance, then only what the reader's own scroll,
  * pointer or click causes.
  */
@@ -319,11 +319,11 @@ details.smooth[open]::details-content {
   block-size: auto;
 }
 
-/* ----------------------------------------------------- fiber-optic backdrop */
+/* ------------------------------------------------ particle galaxy backdrop */
 .light-fallback {
   background:
-    radial-gradient(60% 55% at 32% 42%, rgb(224 138 98 / 0.28), transparent 70%),
-    radial-gradient(45% 50% at 75% 30%, rgb(143 173 230 / 0.14), transparent 70%),
+    radial-gradient(38% 45% at 71% 50%, rgb(224 138 98 / 0.30), transparent 70%),
+    radial-gradient(55% 60% at 80% 40%, rgb(143 173 230 / 0.12), transparent 72%),
     #0a1226;
 }
 .light-canvas {

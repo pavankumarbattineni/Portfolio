@@ -3,165 +3,139 @@
 import { useEffect, useRef } from "react";
 
 /**
- * The site's backdrop: fiber-optic light. Fine glowing strands in the
- * site's clay, with a cool mist edge, drawn by one fragment shader into a
- * fixed full-screen layer behind every section. Light travels along the
- * fibers as moving pulses, with a few sparkles, and the whole field changes
- * shape as the page scrolls:
+ * The site's backdrop: a living particle galaxy. Tens of thousands of points
+ * of light, in the site's palette (an ember-white core, clay arms, a cool
+ * mist rim), drawn on the GPU in one call per frame and placed entirely by
+ * the vertex shader, so there's no simulation on the CPU.
  *
- *   top      a radiant burst: strands fanning out from one bright focal
- *            point, which leans toward the pointer; they ignite on load,
- *            sweeping in from the far end
- *   middle   aurora curtains: soft vertical strands drifting slowly
- *   bottom   flowing threads: long horizontal strands (the contact section)
+ * - Load: the points swirl in from a scattered field and gather into a
+ *   spiral galaxy behind the hero card.
+ * - Always: inner stars orbit faster than outer ones; a soft twinkle; the
+ *   galaxy leans toward the pointer, and points part around it like a hand
+ *   moving through stardust.
+ * - Scroll: the galaxy turns into a breathing sphere of points through the
+ *   middle of the page, then a flowing wave field at Contact.
  *
- * Drawn at a reduced resolution, fewer strands on small screens, only while
- * the tab is visible. Reduced motion gets one settled frame that still
+ * Fewer points on small screens, paused while the tab is hidden, rebuilt if
+ * the GPU drops the context. Reduced motion gets one settled frame that still
  * follows the scroll. Without WebGL, a CSS glow stands in.
  */
 
-const VERTEX = `attribute vec2 p; void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
-
-const FRAGMENT = `
-precision highp float;
-uniform vec2 u_res;
+const VERTEX = `
+attribute vec4 a_seed;
 uniform float u_time;
 uniform float u_intro;
-uniform float u_mode;    // 0 burst .. 1 curtains .. 2 threads
-uniform float u_count;   // strands to draw
-uniform vec2 u_pointer;  // -1..1
+uniform float u_mode;    // 0 galaxy .. 1 sphere .. 2 waves
+uniform float u_aspect;
+uniform float u_size;
+uniform float u_portrait;
+uniform vec2 u_pointer;  // NDC
+varying vec3 v_color;
+varying float v_alpha;
 
-const int MAX_STRANDS = 48;
+const float TAU = 6.2831853;
 
-float hash(float n) { return fract(sin(n * 12.9898) * 43758.5453); }
-float hash2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-
-// A fiber's light at distance d: a bright thin core and a soft halo.
-float fiber(float d, float width) {
-  float core = width / (d + width * 0.6);
-  float halo = 0.06 * width * 12.0 / (d * 18.0 + width * 12.0);
-  return core * core + halo;
+vec3 galaxy(vec4 s) {
+  float r = pow(s.x, 1.8) * 1.3 + 0.03;
+  float arm = floor(s.y * 3.0);
+  float jitter = (s.z - 0.5) * (0.28 + r * 0.55);
+  float angle = arm * TAU / 3.0 + r * 3.4 + jitter + u_time * 0.10 / (0.25 + r);
+  float height = (s.w - 0.5) * 0.10 * (1.2 - r * 0.6);
+  return vec3(cos(angle) * r, height, sin(angle) * r);
 }
 
-// Light travelling along a fiber, s being the position along it.
-float travel(float s, float speed, float seed) {
-  float x = fract(s * 0.55 - u_time * speed + seed) - 0.5;
-  return 0.55 + 1.6 * exp(-x * x * 180.0);
+vec3 sphere(vec4 s) {
+  float theta = s.x * TAU + u_time * 0.06;
+  float phi = acos(2.0 * s.y - 1.0);
+  float radius = 0.92 + 0.07 * sin(u_time * 0.7 + s.z * 14.0 + phi * 3.0) + (s.w - 0.5) * 0.04;
+  return vec3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta)) * radius;
 }
 
-vec3 burst(vec2 uv, float aspect) {
-  vec3 clay = vec3(0.878, 0.541, 0.384);
-  vec3 ember = vec3(1.0, 0.82, 0.66);
-  vec3 mist = vec3(0.56, 0.68, 0.92);
-  vec3 col = vec3(0.0);
-  // Wide screens: between the headline and the hero card, so the fan opens
-  // behind the card. Portrait (phones): low on the right edge, so the light
-  // frames the text instead of crossing it.
-  float portrait = 1.0 - smoothstep(0.7, 1.1, aspect);
-  vec2 focus = vec2(aspect * (mix(0.52, 0.90, portrait) + 0.025 * u_pointer.x), mix(0.44, 0.26, portrait) + 0.035 * u_pointer.y);
-  float reach = mix(aspect * 1.5, -0.15, u_intro);
-  for (int i = 0; i < MAX_STRANDS; i++) {
-    float fi = float(i);
-    if (fi >= u_count) break;
-    float r1 = hash(fi + 1.0), r2 = hash(fi * 3.7 + 2.0), r3 = hash(fi * 7.1 + 5.0);
-    vec2 p = uv - focus;
-    float a = -0.38 + 0.07 * sin(u_time * 0.06 + r3 * 6.0) + 0.04 * u_pointer.y;
-    p = mat2(cos(a), -sin(a), sin(a), cos(a)) * p;
-    float k = mix(0.35, 7.5, r1 * r1) * (1.0 + 0.12 * sin(u_time * 0.18 + fi));
-    float wave = 0.014 * sin(p.y * 6.0 + u_time * (0.3 + r3 * 0.35) + fi * 1.7);
-    float dx = p.x - (k * p.y * p.y + wave - 0.02 * r2);
-    float slope = 2.0 * k * p.y;
-    float d = abs(dx) / sqrt(1.0 + slope * slope);
-    float g = fiber(d, 0.0009 + 0.0026 * r3);
-    float side = smoothstep(-0.03, 0.12, p.x);
-    float near = exp(-length(p) * 2.0);
-    // Lit beyond the ignition front, which sweeps in from the far end to the focal point.
-    float lit = smoothstep(reach - 0.3, reach, length(p) * 1.1);
-    float flow = travel(abs(p.y) + p.x, 0.10 + 0.12 * r1, r2);
-    vec3 tint = mix(mix(clay, mist, smoothstep(0.6, 1.0, r2)), ember, near * 0.5);
-    col += tint * g * side * lit * flow * (0.30 + 1.5 * near) * (0.5 + 0.5 * r2);
-  }
-  return col * mix(1.0, 0.8, portrait);
+vec3 waves(vec4 s) {
+  // A wide sea of stardust running past the screen's edges, low in view.
+  float x = (s.x - 0.5) * 10.0;
+  float z = (s.y - 0.82) * 6.0;
+  float y = 0.18 * sin(x * 1.1 + u_time * 0.5) * cos(z * 1.4 + u_time * 0.3)
+          + 0.07 * sin(x * 2.6 - u_time * 0.4 + z * 1.2);
+  return vec3(x, y - 0.85, z);
 }
 
-vec3 curtains(vec2 uv, float aspect) {
-  vec3 clay = vec3(0.86, 0.52, 0.37);
-  vec3 mist = vec3(0.50, 0.63, 0.88);
-  vec3 col = vec3(0.0);
-  for (int i = 0; i < MAX_STRANDS; i++) {
-    float fi = float(i);
-    if (fi >= u_count) break;
-    float r1 = hash(fi + 11.0), r2 = hash(fi * 2.3 + 7.0), r3 = hash(fi * 5.9 + 3.0);
-    float base = aspect * mix(0.05, 0.95, r1);
-    float x = base
-      + 0.10 * sin(uv.y * (1.1 + r2) + u_time * (0.05 + 0.06 * r3) + fi)
-      + 0.035 * sin(uv.y * (3.2 + 2.0 * r3) - u_time * 0.11 + fi * 2.3);
-    float d = abs(uv.x - x);
-    float g = fiber(d, 0.0008 + 0.0022 * r3);
-    float veil = 0.012 / (d + 0.05);
-    float flow = travel(uv.y, 0.05 + 0.06 * r1, r3);
-    float band = smoothstep(0.0, 0.5, uv.y) * (1.0 - smoothstep(0.35, 1.05, uv.y));
-    vec3 tint = mix(clay, mist, smoothstep(0.45, 0.95, r2));
-    col += tint * (g * flow + veil * 0.10) * band * (0.25 + 0.4 * r2);
-  }
-  return col * 0.7;
-}
-
-vec3 threads(vec2 uv, float aspect) {
-  vec3 clay = vec3(0.88, 0.55, 0.39);
-  vec3 mist = vec3(0.55, 0.69, 0.93);
-  vec3 col = vec3(0.0);
-  for (int i = 0; i < MAX_STRANDS; i++) {
-    float fi = float(i);
-    if (fi >= u_count) break;
-    float r1 = hash(fi + 21.0), r2 = hash(fi * 4.1 + 9.0), r3 = hash(fi * 6.7 + 1.0);
-    float base = mix(0.12, 0.82, r1);
-    float y = base
-      + 0.08 * sin(uv.x * (0.8 + r2) + u_time * (0.09 + 0.10 * r3) + fi)
-      + 0.025 * sin(uv.x * (3.0 + 2.0 * r3) - u_time * 0.2 + fi * 2.1);
-    float d = abs(uv.y - y);
-    float g = fiber(d, 0.0009 + 0.0024 * r3);
-    float flow = travel(uv.x, 0.07 + 0.09 * r1, r2);
-    float fade = smoothstep(0.0, 0.3, uv.x / aspect) * (1.0 - smoothstep(0.6, 1.0, uv.x / aspect));
-    vec3 tint = mix(clay, mist, smoothstep(0.5, 1.0, r2));
-    col += tint * g * flow * (0.3 + 0.55 * fade) * (0.45 + 0.55 * r2);
-  }
-  return col;
-}
+mat3 rotX(float a) { float c = cos(a), s = sin(a); return mat3(1.0, 0.0, 0.0, 0.0, c, s, 0.0, -s, c); }
+mat3 rotY(float a) { float c = cos(a), s = sin(a); return mat3(c, 0.0, -s, 0.0, 1.0, 0.0, s, 0.0, c); }
 
 void main() {
-  vec2 uv = gl_FragCoord.xy / u_res.y;
-  float aspect = u_res.x / u_res.y;
-  vec3 col;
-  if (u_mode <= 0.0) col = burst(uv, aspect);
-  else if (u_mode < 1.0) col = mix(burst(uv, aspect), curtains(uv, aspect), u_mode);
-  else if (u_mode == 1.0) col = curtains(uv, aspect);
-  else if (u_mode < 2.0) col = mix(curtains(uv, aspect), threads(uv, aspect), u_mode - 1.0);
-  else col = threads(uv, aspect);
+  vec4 s = a_seed;
+  float toSphere = clamp(u_mode, 0.0, 1.0);
+  float toWaves = clamp(u_mode - 1.0, 0.0, 1.0);
+  vec3 form = mix(mix(galaxy(s), sphere(s), toSphere), waves(s), toWaves);
 
-  // Sparkles: a few tiny points that twinkle where there is light.
-  vec2 cell = floor(gl_FragCoord.xy / 3.0);
-  float star = step(0.9975, hash2(cell));
-  float twinkle = 0.5 + 0.5 * sin(u_time * (1.0 + 3.0 * hash2(cell + 7.0)) + hash2(cell) * 40.0);
-  col += vec3(1.0, 0.86, 0.76) * star * twinkle * min(1.0, dot(col, vec3(0.6))) * 1.6;
+  // Intro: each point flies in from a scattered field, a little staggered.
+  float t = clamp(u_intro * 1.4 - s.w * 0.4, 0.0, 1.0);
+  float ease = 1.0 - (1.0 - t) * (1.0 - t) * (1.0 - t);
+  vec3 scatter = (s.xyz - 0.5) * vec3(9.0, 6.0, 7.0);
+  vec3 p = mix(scatter, form, ease);
 
-  col = 1.0 - exp(-col * 1.1);
-  // On the site's deepest navy (#0a1226), which shows before the light ignites.
-  gl_FragColor = vec4(vec3(0.039, 0.071, 0.149) + col * u_intro, 1.0);
+  // Camera: the galaxy seen at an angle, the sphere and the waves more level.
+  float tilt = mix(mix(0.92, 0.30, toSphere), 0.42, toWaves) + u_pointer.y * 0.12;
+  float turn = u_time * 0.035 + u_pointer.x * 0.25;
+  p = rotX(tilt) * rotY(turn) * p;
+  float depth = p.z + 3.1;
+  vec2 proj = p.xy * mix(2.7, 2.1, max(toSphere, toWaves)) / depth;
+
+  // Where it sits: the galaxy behind the hero card (low and right on phones),
+  // the sphere and waves centred.
+  vec2 galaxyAt = mix(vec2(0.40, 0.0), vec2(0.62, -0.70), u_portrait);
+  vec2 at = mix(galaxyAt, vec2(0.0, -0.05), max(toSphere, toWaves));
+  float scale = mix(1.0, 0.72, u_portrait);
+  vec2 ndc = vec2(proj.x * scale / u_aspect, proj.y * scale) + at;
+
+  // Points part around the pointer.
+  vec2 d = ndc - u_pointer;
+  d.x *= u_aspect;
+  float push = exp(-dot(d, d) * 18.0) * 0.06;
+  ndc += normalize(d + vec2(0.0001)) * push * vec2(1.0 / u_aspect, 1.0);
+
+  gl_Position = vec4(ndc, 0.0, 1.0);
+  gl_PointSize = u_size * (0.8 + s.w * 1.8) * (3.1 / depth);
+
+  // Colour by distance from the centre: ember core, clay, mist rim.
+  float rr = length(form.xz) * (1.0 - toSphere) * (1.0 - toWaves) + (1.0 - abs(form.y)) * 0.6 * toSphere + s.x * toWaves;
+  vec3 ember = vec3(1.0, 0.86, 0.72);
+  vec3 clay = vec3(0.88, 0.54, 0.38);
+  vec3 mist = vec3(0.55, 0.68, 0.94);
+  vec3 col = mix(ember, clay, smoothstep(0.02, 0.45, rr));
+  col = mix(col, mist, smoothstep(0.55, 1.15, rr) * 0.85 + step(0.93, s.z) * 0.5);
+  float twinkle = 0.65 + 0.35 * sin(u_time * (1.2 + s.y * 2.5) + s.z * 40.0);
+  // The galaxy's core: bigger, softer points that pool into a glow.
+  float core = (1.0 - smoothstep(0.0, 0.32, rr)) * (1.0 - toSphere) * (1.0 - toWaves);
+  gl_PointSize *= 1.0 + mix(2.6, 1.2, u_portrait) * core;
+  v_color = col;
+  // Phones pack the same galaxy into less room: dimmer, so it never blows out.
+  v_alpha = (0.40 + 0.55 * s.w) * twinkle * mix(0.35, 1.0, ease) * (1.0 - 0.45 * core) * mix(1.0, 0.5, u_portrait);
 }
 `;
 
-/** Canvas pixels per CSS pixel: soft light needs few, and it keeps the GPU cool. */
-const RESOLUTION = 0.6;
-const INTRO_MS = 1600;
+const FRAGMENT = `
+precision mediump float;
+varying vec3 v_color;
+varying float v_alpha;
+void main() {
+  float d = length(gl_PointCoord - 0.5);
+  float a = 1.0 - smoothstep(0.0, 0.5, d);
+  gl_FragColor = vec4(v_color * a * a * v_alpha, 1.0);
+}
+`;
 
-/** Page progress (0-1) to field shape: burst on top, curtains, threads at the bottom. */
+const INTRO_MS = 2600;
+const NAVY = [0.039, 0.071, 0.149] as const; // #0a1226
+
+/** Page progress (0-1) to formation: galaxy on top, sphere, waves at the bottom. */
 function modeAt(progress: number) {
   const smooth = (a: number, b: number, x: number) => {
     const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
     return t * t * (3 - 2 * t);
   };
-  return smooth(0.03, 0.22, progress) + smooth(0.78, 0.97, progress);
+  return smooth(0.04, 0.24, progress) + smooth(0.76, 0.96, progress);
 }
 
 function compile(gl: WebGLRenderingContext, type: number, source: string) {
@@ -172,6 +146,17 @@ function compile(gl: WebGLRenderingContext, type: number, source: string) {
   return gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? shader : null;
 }
 
+/** Deterministic seeds, so every load draws the same galaxy. */
+function seeds(count: number) {
+  const data = new Float32Array(count * 4);
+  let state = 1234567;
+  for (let i = 0; i < data.length; i++) {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    data[i] = state / 4294967296;
+  }
+  return data;
+}
+
 export function LightField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -179,16 +164,16 @@ export function LightField() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    const pointer = { x: 2, y: 2, tx: 2, ty: 2 }; // off screen until the pointer moves
     const started = performance.now();
     let mode = 0;
     let frame = 0;
-    // Set up again whenever the browser gives the GPU context back.
+    let count = 0;
     let gl: WebGLRenderingContext | null = null;
     let uniforms: Record<string, WebGLUniformLocation | null> = {};
 
     const setup = () => {
-      const context = canvas.getContext("webgl", { alpha: false, antialias: false, powerPreference: "low-power" });
+      const context = canvas.getContext("webgl", { alpha: false, antialias: false, powerPreference: "high-performance" });
       if (!context || context.isContextLost()) return false;
       const vs = compile(context, context.VERTEX_SHADER, VERTEX);
       const fs = compile(context, context.FRAGMENT_SHADER, FRAGMENT);
@@ -199,13 +184,25 @@ export function LightField() {
       context.linkProgram(program);
       if (!context.getProgramParameter(program, context.LINK_STATUS)) return false;
       context.useProgram(program);
+
+      // Fewer points where the screen (and usually the GPU) is small.
+      count = innerWidth < 640 ? 26000 : innerWidth < 1100 ? 46000 : 72000;
       context.bindBuffer(context.ARRAY_BUFFER, context.createBuffer());
-      context.bufferData(context.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), context.STATIC_DRAW);
-      const position = context.getAttribLocation(program, "p");
-      context.enableVertexAttribArray(position);
-      context.vertexAttribPointer(position, 2, context.FLOAT, false, 0, 0);
+      context.bufferData(context.ARRAY_BUFFER, seeds(count), context.STATIC_DRAW);
+      const seed = context.getAttribLocation(program, "a_seed");
+      context.enableVertexAttribArray(seed);
+      context.vertexAttribPointer(seed, 4, context.FLOAT, false, 0, 0);
+
+      context.disable(context.DEPTH_TEST);
+      context.enable(context.BLEND);
+      context.blendFunc(context.ONE, context.ONE); // light adds up
+      context.clearColor(NAVY[0], NAVY[1], NAVY[2], 1);
+
       uniforms = Object.fromEntries(
-        ["u_res", "u_time", "u_intro", "u_mode", "u_count", "u_pointer"].map((name) => [name, context.getUniformLocation(program, name)]),
+        ["u_time", "u_intro", "u_mode", "u_aspect", "u_size", "u_portrait", "u_pointer"].map((name) => [
+          name,
+          context.getUniformLocation(program, name),
+        ]),
       );
       gl = context;
       return true;
@@ -213,14 +210,14 @@ export function LightField() {
 
     const resize = () => {
       if (!gl) return;
-      const width = innerWidth;
-      const height = innerHeight;
-      canvas.width = Math.max(1, Math.round(width * RESOLUTION));
-      canvas.height = Math.max(1, Math.round(height * RESOLUTION));
+      const dpr = Math.min(devicePixelRatio || 1, 1.5);
+      canvas.width = Math.max(1, Math.round(innerWidth * dpr));
+      canvas.height = Math.max(1, Math.round(innerHeight * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.uniform2f(uniforms.u_res, canvas.width, canvas.height);
-      // Fewer strands where the screen (and usually the GPU) is small.
-      gl.uniform1f(uniforms.u_count, width < 640 ? 24 : width < 1100 ? 36 : 46);
+      const aspect = innerWidth / innerHeight;
+      gl.uniform1f(uniforms.u_aspect, aspect);
+      gl.uniform1f(uniforms.u_portrait, aspect < 0.9 ? 1 : 0);
+      gl.uniform1f(uniforms.u_size, 2.1 * dpr);
     };
 
     const progress = () => {
@@ -231,17 +228,17 @@ export function LightField() {
     const draw = (now: number) => {
       if (!gl) return;
       const elapsed = now - started;
-      const intro = reduce ? 1 : Math.min(1, elapsed / INTRO_MS);
       const target = modeAt(progress());
-      mode = reduce ? target : mode + (target - mode) * 0.06;
+      mode = reduce ? target : mode + (target - mode) * 0.05;
       if (Math.abs(target - mode) < 0.001) mode = target;
-      pointer.x += (pointer.tx - pointer.x) * 0.035;
-      pointer.y += (pointer.ty - pointer.y) * 0.035;
-      gl.uniform1f(uniforms.u_time, reduce ? 14 : elapsed / 1000);
-      gl.uniform1f(uniforms.u_intro, 1 - Math.pow(1 - intro, 3));
+      pointer.x += (pointer.tx - pointer.x) * 0.08;
+      pointer.y += (pointer.ty - pointer.y) * 0.08;
+      gl.uniform1f(uniforms.u_time, reduce ? 20 : elapsed / 1000);
+      gl.uniform1f(uniforms.u_intro, reduce ? 1 : Math.min(1, elapsed / INTRO_MS));
       gl.uniform1f(uniforms.u_mode, mode);
       gl.uniform2f(uniforms.u_pointer, pointer.x, pointer.y);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.POINTS, 0, count);
     };
 
     const loop = (now: number) => {
@@ -283,13 +280,20 @@ export function LightField() {
       pointer.tx = (event.clientX / innerWidth) * 2 - 1;
       pointer.ty = -((event.clientY / innerHeight) * 2 - 1);
     };
+    const onLeave = () => {
+      pointer.tx = 2;
+      pointer.ty = 2;
+    };
 
     canvas.addEventListener("webglcontextlost", onLost);
     canvas.addEventListener("webglcontextrestored", onRestored);
     addEventListener("resize", onResize);
     addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("visibilitychange", onVisibility);
-    if (!reduce) addEventListener("pointermove", onPointer, { passive: true });
+    if (!reduce) {
+      addEventListener("pointermove", onPointer, { passive: true });
+      document.documentElement.addEventListener("pointerleave", onLeave);
+    }
     begin();
 
     // The context stays with the canvas: losing it on purpose here would
@@ -302,6 +306,7 @@ export function LightField() {
       removeEventListener("scroll", onScroll);
       document.removeEventListener("visibilitychange", onVisibility);
       removeEventListener("pointermove", onPointer);
+      document.documentElement.removeEventListener("pointerleave", onLeave);
     };
   }, []);
 
@@ -310,7 +315,7 @@ export function LightField() {
       {/* The glow without WebGL, and under the first frames. */}
       <div className="light-fallback absolute inset-0" />
       <canvas ref={canvasRef} className="light-canvas absolute inset-0 size-full" />
-      {/* Keeps text readable: deepens the edges and the reading column's background. */}
+      {/* Keeps text readable: deepens the edges. */}
       <div className="light-vignette absolute inset-0" />
     </div>
   );

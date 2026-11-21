@@ -6,7 +6,7 @@ import { Container, GitHubIcon, LinkedInIcon } from "./ui";
 
 export function Hero() {
   return (
-    // Transparent: the fiber-optic backdrop (LightField) is the hero's background.
+    // Transparent: the particle galaxy backdrop (LightField) is the hero's background.
     <section id="top" aria-labelledby="hero-title" className="on-hero relative text-hero-ink">
       <Container className="relative grid items-center gap-12 pt-14 pb-16 sm:pt-20 sm:pb-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:gap-14 lg:pt-24 lg:pb-28">
         <div>
