@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 
 import { experience } from "@/content/profile";
+import { CountUp } from "./count-up";
 import { InView } from "./in-view";
 import { Chip, Container, SectionHeading } from "./ui";
 
@@ -14,7 +15,7 @@ export function Experience() {
           lead="Production multi-agent systems for investment research."
         />
 
-        <div className="mt-12 rounded-3xl border border-line bg-paper p-6 sm:mt-16 sm:p-10">
+        <div data-spotlight className="mt-12 rounded-3xl border border-line bg-paper p-6 sm:mt-16 sm:p-10">
           <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-start">
             <div>
               <h3 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">{experience.company}</h3>
@@ -30,7 +31,9 @@ export function Experience() {
             {experience.highlights.map((item, i) => (
               <li key={item.unit} style={{ "--i": i } as CSSProperties} className="reveal md:px-8 md:first:pl-0 md:last:pr-0">
                 <p className="flex items-baseline gap-2">
-                  <span className="text-5xl font-semibold tracking-[-0.03em] tabular-nums">{item.metric}</span>
+                  <span className="text-5xl font-semibold tracking-[-0.03em] tabular-nums">
+                    <CountUp value={item.metric} />
+                  </span>
                   <span className="font-medium text-accent">{item.unit}</span>
                 </p>
                 <p className="mt-3 text-slate text-pretty">{item.text}</p>
@@ -39,7 +42,9 @@ export function Experience() {
           </InView>
 
           <h4 className="mt-14 text-lg font-semibold">Projects at {experience.company.split(" ")[0]}</h4>
-          <ol className="mt-6 space-y-10 border-l border-line pl-6 sm:pl-8">
+          <ol className="relative mt-6 space-y-10 border-l border-line pl-6 sm:pl-8">
+            {/* The line draws itself down as you read. */}
+            <span aria-hidden="true" className="timeline-fill absolute top-0 bottom-0 -left-px w-px bg-accent" />
             {experience.projects.map((project) => (
               <li key={project.name} className="relative">
                 <span

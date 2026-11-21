@@ -1,4 +1,6 @@
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
+
+import { InView } from "./in-view";
 
 export function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -7,6 +9,26 @@ export function cx(...classes: (string | false | null | undefined)[]) {
 /** The page column: 16px gutters on phones, wider from tablet up. */
 export function Container({ className, ...props }: ComponentProps<"div">) {
   return <div className={cx("mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8", className)} {...props} />;
+}
+
+/**
+ * A heading's words, each in its own span so they can arrive one after
+ * another (.words / .word in globals.css). The text reads the same.
+ */
+export function Words({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(\s+)/).map((part, i) =>
+        /^\s+$/.test(part) ? (
+          part
+        ) : (
+          <span key={i} className="word" style={{ "--w": Math.floor(i / 2) } as CSSProperties}>
+            {part}
+          </span>
+        ),
+      )}
+    </>
+  );
 }
 
 export function SectionHeading({
@@ -22,9 +44,10 @@ export function SectionHeading({
   size?: "md" | "lg";
 }) {
   return (
-    <header className="max-w-2xl">
+    <InView as="header" amount={0.4} className="words max-w-2xl">
       <h2
         id={id}
+        aria-label={title}
         className={cx(
           "leading-tight font-semibold text-balance",
           size === "lg"
@@ -32,10 +55,12 @@ export function SectionHeading({
             : "text-[2rem] tracking-[-0.02em] sm:text-[2.5rem]",
         )}
       >
-        {title}
+        <span aria-hidden="true">
+          <Words text={title} />
+        </span>
       </h2>
       {lead && <p className="mt-3 text-lg text-slate text-pretty">{lead}</p>}
-    </header>
+    </InView>
   );
 }
 

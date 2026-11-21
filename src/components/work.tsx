@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 
 import { projects, type Project } from "@/content/profile";
+import { CountUp } from "./count-up";
 import { InView } from "./in-view";
 import { Screens } from "./screens";
 import { Chip, Container, SectionHeading, cx } from "./ui";
@@ -163,16 +164,18 @@ function ProjectStudy({ project, flip }: { project: Project; flip: boolean }) {
         <div className={cx("space-y-6 lg:sticky lg:top-24 lg:self-start", flip && "lg:order-1")}>
           <ProjectTrace project={project} />
 
-          <dl className="grid grid-cols-3 divide-x divide-line rounded-2xl border border-line">
+          <dl data-spotlight className="grid grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-paper">
             {project.facts.map((fact) => (
               <div key={fact.label} className="flex flex-col px-3 py-4 sm:px-5">
                 <dt className="mt-1 text-[13px] leading-snug text-slate">{fact.label}</dt>
-                <dd className="order-first text-3xl font-semibold tracking-tight tabular-nums">{fact.value}</dd>
+                <dd className="order-first text-3xl font-semibold tracking-tight tabular-nums">
+                  <CountUp value={fact.value} />
+                </dd>
               </div>
             ))}
           </dl>
 
-          <div className="rounded-2xl border border-line p-5 sm:p-6">
+          <div data-spotlight className="rounded-2xl border border-line bg-paper p-5 sm:p-6">
             <p className="text-[13px] text-accent">The hard part</p>
             <p className="mt-1 text-lg font-semibold text-balance">{project.hardPart.title}</p>
             <p className="mt-2 text-slate text-pretty">{project.hardPart.body}</p>
@@ -189,7 +192,7 @@ function ProjectStudy({ project, flip }: { project: Project; flip: boolean }) {
 
 export function Work() {
   return (
-    <section aria-labelledby="work-title" id="work" className="py-20 sm:py-28">
+    <section aria-labelledby="work-title" id="work" className="bg-paper py-20 sm:py-28">
       <Container>
         <SectionHeading
           id="work-title"

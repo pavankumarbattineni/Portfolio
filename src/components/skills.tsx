@@ -19,7 +19,7 @@ const LAYOUT: { icon: LucideIcon; span: string; featured?: boolean }[] = [
  */
 export function Skills() {
   return (
-    <section aria-labelledby="skills-title" id="skills" className="py-20 sm:py-28">
+    <section aria-labelledby="skills-title" id="skills" className="bg-paper py-20 sm:py-28">
       <Container>
         <SectionHeading
           id="skills-title"
@@ -33,6 +33,7 @@ export function Skills() {
             return (
               <li
                 key={group.title}
+                data-spotlight
                 style={{ "--i": i } as CSSProperties}
                 className={cx(
                   "reveal relative flex flex-col overflow-hidden rounded-3xl p-6 sm:p-8",

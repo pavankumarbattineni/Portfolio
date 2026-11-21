@@ -3,7 +3,7 @@ import { Container } from "./ui";
 
 export function Credentials() {
   return (
-    <section aria-labelledby="education-title" id="education" className="border-t border-line py-20 sm:py-28">
+    <section aria-labelledby="education-title" id="education" className="border-t border-line bg-paper py-20 sm:py-28">
       <Container className="grid gap-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
         <div>
           <h2 id="education-title" className="text-[2rem] leading-tight font-semibold tracking-[-0.02em] sm:text-[2.5rem]">

@@ -1,17 +1,13 @@
 import { Briefcase, Download, MapPin, MapPinned } from "lucide-react";
 
 import { profile } from "@/content/profile";
-import { HeroTrace } from "./hero-trace";
+import { HeroConstellation } from "./hero-constellation";
 import { Container, GitHubIcon, LinkedInIcon } from "./ui";
 
 export function Hero() {
   return (
-    <section id="top" aria-labelledby="hero-title" className="on-hero relative overflow-hidden bg-hero text-hero-ink">
-      {/* A faint timeline grid, the trace's axis carried across the hero. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:linear-gradient(to_right,var(--hero-line)_1px,transparent_1px)] [background-size:96px_100%] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
-      />
+    // Transparent: the fiber-optic backdrop (LightField) is the hero's background.
+    <section id="top" aria-labelledby="hero-title" className="on-hero relative text-hero-ink">
       <Container className="relative grid items-center gap-12 pt-14 pb-16 sm:pt-20 sm:pb-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:gap-14 lg:pt-24 lg:pb-28">
         <div>
           <p className="enter inline-flex items-center gap-2 rounded-full border border-hero-line px-3.5 py-1.5 text-[14px] text-hero-ink">
@@ -71,7 +67,7 @@ export function Hero() {
         </div>
 
         <div className="enter-panel">
-          <HeroTrace />
+          <HeroConstellation />
         </div>
       </Container>
     </section>

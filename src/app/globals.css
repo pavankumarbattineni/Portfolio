@@ -25,8 +25,9 @@
 }
 
 :root[data-theme="dark"] {
-  --paper: #0d1730;
-  --mist: #13213f;
+  /* Reading surfaces are frosted glass over the fiber-optic backdrop. */
+  --paper: rgb(10 18 40 / 0.74);
+  --mist: rgb(17 29 58 / 0.66);
   --ink: #e9edf5;
   --slate: #a3acbf;
   --line: #26365a;
@@ -43,15 +44,15 @@
 /* Before the theme script runs (or without it): follow the system. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --paper: #0d1730;
-    --mist: #13213f;
+    --paper: rgb(10 18 40 / 0.74);
+    --mist: rgb(17 29 58 / 0.66);
     --ink: #e9edf5;
     --slate: #a3acbf;
     --line: #26365a;
     --accent: #e08a62;
     --accent-hover: #eba07d;
     --accent-soft: #2e2a3a;
-  --on-accent: #13213f;
+    --on-accent: #13213f;
     --hero: #0a1226;
     --hero-raised: #13213f;
     --hero-line: rgb(255 255 255 / 0.1);
@@ -83,10 +84,13 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
   -webkit-text-size-adjust: 100%;
+  /* The backdrop's navy, also under any overscroll. */
+  background: #0a1226;
 }
 
 body {
-  background: var(--paper);
+  /* Transparent: the fixed fiber-optic layer (LightField) shows through. */
+  background: transparent;
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 1.0625rem;
@@ -121,28 +125,10 @@ body {
   color: var(--accent-hover);
 }
 
-@keyframes caret {
-  50% {
-    opacity: 0;
-  }
-}
-.caret {
-  animation: caret 1s steps(1) infinite;
-}
-
-@keyframes pulse-dot {
-  50% {
-    opacity: 0.35;
-  }
-}
-.running-dot {
-  animation: pulse-dot 1.2s ease-in-out infinite;
-}
-
 /* ------------------------------------------------------------------ motion
- * One orchestrated moment (the hero), then motion only where the reader's
- * own scroll or click causes it. Everything plays once and settles; nothing
- * loops except the "running" dot while a trace runs.
+ * The fiber-optic backdrop lives and flows the whole time, quietly. Content
+ * moves once: the hero's entrance, then only what the reader's own scroll,
+ * pointer or click causes.
  */
 :root {
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* fast start, long soft landing */
@@ -333,9 +319,215 @@ details.smooth[open]::details-content {
   block-size: auto;
 }
 
+/* ----------------------------------------------------- fiber-optic backdrop */
+.light-fallback {
+  background:
+    radial-gradient(60% 55% at 32% 42%, rgb(224 138 98 / 0.28), transparent 70%),
+    radial-gradient(45% 50% at 75% 30%, rgb(143 173 230 / 0.14), transparent 70%),
+    #0a1226;
+}
+.light-canvas {
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-out);
+}
+.light-canvas[data-ready] {
+  opacity: 1;
+}
+/* Deepens the edges so the light frames the content rather than fights it. */
+.light-vignette {
+  background:
+    radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(4 9 22 / 0.55)),
+    linear-gradient(to bottom, rgb(4 9 22 / 0.35), transparent 18%, transparent 82%, rgb(4 9 22 / 0.45));
+}
+
+/* Lenis (inertial scroll): it moves the page itself. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+/* Glass: frosted panels over the light. */
+.glass {
+  /* A deep navy tint under the sheen: the light stays behind the text, not on it. */
+  background:
+    linear-gradient(160deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.02) 45%, rgb(255 255 255 / 0.04)),
+    rgb(9 16 36 / 0.72);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  box-shadow:
+    0 30px 90px -40px rgb(0 0 0 / 0.75),
+    inset 0 1px 0 rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+
+/* Headings arrive word by word as they scroll into view. */
+.word {
+  display: inline-block;
+  white-space: pre;
+}
+[data-js] .words .word {
+  opacity: 0;
+  translate: 0 0.45em;
+  filter: blur(8px);
+  transition:
+    opacity 0.9s var(--ease-out),
+    translate 0.9s var(--ease-out),
+    filter 0.9s var(--ease-out);
+  transition-delay: calc(var(--w, 0) * 70ms);
+}
+[data-js] [data-inview] .words .word,
+[data-js] .words[data-inview] .word {
+  opacity: 1;
+  translate: 0 0;
+  filter: blur(0);
+}
+
+/* A soft light that follows the pointer across cards (Motion sets --mx/--my). */
+[data-spotlight] {
+  position: relative;
+  isolation: isolate;
+}
+[data-spotlight]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgb(224 138 98 / 0.16), transparent 65%);
+  transition: opacity 0.4s var(--ease-out);
+}
+[data-spotlight]:hover::after {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------- hero constellation */
+.constellation-stage {
+  perspective: 1400px;
+}
+/* No preserve-3d: it would switch off the card's frosted glass (backdrop-filter). */
+.constellation-tilt {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  will-change: transform;
+}
+@keyframes float {
+  50% {
+    translate: 0 -8px;
+  }
+}
+.constellation-float {
+  animation: float 7s var(--ease-in-out) infinite;
+}
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+.orbit {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.orbit-slow {
+  animation: spin 90s linear infinite;
+}
+.orbit-reverse {
+  animation: spin 24s linear infinite reverse;
+}
+@keyframes breathe {
+  50% {
+    opacity: 0.6;
+    scale: 0.92;
+  }
+}
+.hub-breathe {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: breathe 5s var(--ease-in-out) infinite;
+}
+@keyframes edge-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+.edge-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: edge-draw 1.4s var(--ease-out) both;
+  animation-delay: 700ms;
+}
+@keyframes node-in {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+.node-in {
+  animation: node-in 0.8s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 900ms);
+}
+
+/* ------------------------------------------------- contact: tile to panel
+ * As Contact scrolls in, its panel grows from a small rounded tile to its
+ * full size (scroll-driven where supported; simply shown elsewhere).
+ */
+@supports (animation-timeline: view()) {
+  .morph-panel {
+    animation: morph linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 38%;
+  }
+}
+@keyframes morph {
+  from {
+    clip-path: inset(18% 34% 30% 34% round 48px);
+    opacity: 0.4;
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 32px);
+    opacity: 1;
+  }
+}
+
+/* The experience timeline draws itself down as you read it. */
+@supports (animation-timeline: view()) {
+  .timeline-fill {
+    transform-origin: top;
+    animation: fill-down linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 70%;
+  }
+}
+@keyframes fill-down {
+  from {
+    scale: 1 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .constellation-float,
+  .orbit,
+  .hub-breathe,
+  .morph-panel,
+  .timeline-fill {
+    animation: none !important;
+  }
+  .pulse {
+    display: none;
+  }
+  [data-js] .words .word {
+    opacity: 1;
+    translate: 0 0;
+    filter: none;
   }
   *,
   *::before,

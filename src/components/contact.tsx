@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Briefcase, Check, Copy, Download, MapPinned, Phone } from "lucide-react";
 
 import { profile } from "@/content/profile";
-import { Container, GitHubIcon, LinkedInIcon } from "./ui";
+import { InView } from "./in-view";
+import { Container, GitHubIcon, LinkedInIcon, Words } from "./ui";
 
 function CopyEmail() {
   const [copied, setCopied] = useState(false);
@@ -33,11 +34,21 @@ const linkClass =
 
 export function Contact() {
   return (
-    <section id="contact" aria-labelledby="contact-title" className="on-hero bg-hero text-hero-ink">
-      <Container className="py-20 sm:py-28">
-        <h2 id="contact-title" className="text-[2.5rem] leading-[1.05] font-semibold tracking-[-0.03em] text-balance sm:text-6xl">
-          Let&apos;s build something that ships.
-        </h2>
+    // Transparent: the backdrop's flowing threads run behind it.
+    <section id="contact" aria-labelledby="contact-title" className="on-hero relative text-hero-ink">
+      <Container className="py-16 sm:py-24">
+        <div className="morph-panel glass rounded-[32px] px-5 py-12 sm:px-12 sm:py-16">
+        <InView amount={0.5} className="words">
+          <h2
+            id="contact-title"
+            aria-label="Let's build something that ships."
+            className="text-[2.5rem] leading-[1.05] font-semibold tracking-[-0.03em] text-balance sm:text-6xl"
+          >
+            <span aria-hidden="true">
+              <Words text="Let's build something that ships." />
+            </span>
+          </h2>
+        </InView>
         <p className="mt-5 max-w-xl text-lg text-hero-muted text-pretty">
           I&apos;m open to GenAI Engineer and Agentic AI Engineer roles. Email is the fastest way to reach me.
         </p>
@@ -95,9 +106,10 @@ export function Contact() {
             </a>
           </li>
         </ul>
+        </div>
       </Container>
 
-      <footer className="border-t border-hero-line">
+      <footer className="border-t border-white/[0.08] bg-[#0a1226]/50 backdrop-blur-md">
         <Container className="flex flex-col gap-2 py-6 text-[14px] text-hero-muted sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 {profile.name}</p>
           <p>
