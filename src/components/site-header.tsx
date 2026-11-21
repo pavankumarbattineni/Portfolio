@@ -159,7 +159,7 @@ export function SiteHeader() {
   // As with the theme icon: only turn once the reader has used the menu.
   const [menuUsed, setMenuUsed] = useState(false);
   return (
-    <header className="on-hero sticky top-0 z-40 border-b border-white/[0.08] bg-[#0a1226]/[0.86] text-hero-ink backdrop-blur-xl backdrop-saturate-150">
+    <header className="site-header on-hero sticky top-0 z-40 border-b border-white/[0.08] text-hero-ink backdrop-blur-xl backdrop-saturate-150">
       <Container className="flex h-16 items-center justify-between gap-4">
         <a href="#top" className="group flex items-center gap-2.5 font-semibold tracking-tight" onClick={() => setOpen(false)}>
           <span

@@ -66,7 +66,7 @@ export function SectionHeading({
 
 export function Chip({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-line px-2.5 py-0.5 text-sm text-slate">
+    <span className="inline-flex items-center rounded-full border border-line bg-paper px-2.5 py-0.5 text-sm text-slate">
       {children}
     </span>
   );

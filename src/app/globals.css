@@ -340,6 +340,20 @@ details.smooth[open]::details-content {
     linear-gradient(to bottom, rgb(4 9 22 / 0.35), transparent 18%, transparent 82%, rgb(4 9 22 / 0.45));
 }
 
+/* Header: solid brand navy over the light theme's white sections (a
+   translucent one turns grey there); frosted over the dark theme's galaxy. */
+.site-header {
+  background: var(--hero);
+}
+:root[data-theme="dark"] .site-header {
+  background: rgb(10 18 38 / 0.78);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .site-header {
+    background: rgb(10 18 38 / 0.78);
+  }
+}
+
 /* Lenis (inertial scroll): it moves the page itself. */
 html.lenis,
 html.lenis body {

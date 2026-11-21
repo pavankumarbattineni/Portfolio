@@ -84,7 +84,7 @@ void main() {
 
   // Where it sits: the galaxy behind the hero card (low and right on phones),
   // the sphere and waves centred.
-  vec2 galaxyAt = mix(vec2(0.40, 0.0), vec2(0.62, -0.70), u_portrait);
+  vec2 galaxyAt = mix(vec2(0.43, 0.0), vec2(0.62, -0.70), u_portrait);
   vec2 at = mix(galaxyAt, vec2(0.0, -0.05), max(toSphere, toWaves));
   float scale = mix(1.0, 0.72, u_portrait);
   vec2 ndc = vec2(proj.x * scale / u_aspect, proj.y * scale) + at;
@@ -112,6 +112,8 @@ void main() {
   v_color = col;
   // Phones pack the same galaxy into less room: dimmer, so it never blows out.
   v_alpha = (0.40 + 0.55 * s.w) * twinkle * mix(0.35, 1.0, ease) * (1.0 - 0.45 * core) * mix(1.0, 0.5, u_portrait);
+  // The sphere sits behind reading sections: quieter there.
+  v_alpha *= 1.0 - 0.4 * toSphere * (1.0 - toWaves);
 }
 `;
 
@@ -135,7 +137,9 @@ function modeAt(progress: number) {
     const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
     return t * t * (3 - 2 * t);
   };
-  return smooth(0.04, 0.24, progress) + smooth(0.76, 0.96, progress);
+  // The galaxy becomes the sphere while the hero scrolls away, so no
+  // half-formed shape sits behind a heading.
+  return smooth(0.015, 0.11, progress) + smooth(0.82, 0.97, progress);
 }
 
 function compile(gl: WebGLRenderingContext, type: number, source: string) {
@@ -216,7 +220,10 @@ export function LightField() {
       gl.viewport(0, 0, canvas.width, canvas.height);
       const aspect = innerWidth / innerHeight;
       gl.uniform1f(uniforms.u_aspect, aspect);
-      gl.uniform1f(uniforms.u_portrait, aspect < 0.9 ? 1 : 0);
+      // Stacked layout (one column below 1024px, as the hero's grid) or a tall
+      // screen: the hero card sits under the text, so the galaxy moves out of
+      // the text's way.
+      gl.uniform1f(uniforms.u_portrait, innerWidth < 1024 || aspect < 0.9 ? 1 : 0);
       gl.uniform1f(uniforms.u_size, 2.1 * dpr);
     };
 

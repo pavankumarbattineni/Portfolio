@@ -42,13 +42,13 @@ export function Skills() {
                 )}
               >
                 {featured && (
-                  /* The hero's timeline grid, faintly, so the core card reads as part of it. */
+                  /* The hero's warm core light, so the core card reads as part of it. */
                   <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,var(--hero-line)_1px,transparent_1px)] [background-size:72px_100%] [mask-image:linear-gradient(to_left,black,transparent_70%)]"
+                    className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_90%_at_100%_0%,rgb(224_138_98/0.20),transparent_65%),radial-gradient(50%_60%_at_0%_100%,rgb(143_173_230/0.08),transparent_70%)]"
                   />
                 )}
-                <div className="relative flex items-start gap-4">
+                <div className="relative flex flex-col items-start gap-4 sm:flex-row">
                   <span
                     aria-hidden="true"
                     className={cx(

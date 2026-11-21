@@ -189,11 +189,11 @@ export function HeroConstellation() {
             {/* The hub: his mark. */}
             <div
               aria-hidden="true"
-              className="absolute grid size-[17%] min-w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[22%] bg-hero-ink text-[clamp(15px,2.2vw,22px)] font-bold tracking-tight text-hero shadow-[0_0_0_6px_rgb(224_138_98/0.12),0_0_60px_rgb(224_138_98/0.45)]"
+              className="absolute grid aspect-square w-[clamp(3.5rem,14%,5.25rem)] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[22%] bg-hero-ink text-[clamp(15px,2.2vw,22px)] font-bold tracking-tight text-hero shadow-[0_0_0_6px_rgb(224_138_98/0.12),0_0_60px_rgb(224_138_98/0.45)]"
               style={{ left: "50%", top: "50%" }}
             >
               PK
-              <span className="absolute -right-1 -bottom-1 size-[22%] min-w-3 rounded-full border-[3px] border-hero bg-hero-accent" />
+              <span className="absolute -right-1 -bottom-1 size-3.5 rounded-full border-[3px] border-hero bg-hero-accent sm:size-4" />
             </div>
 
             {/* The parts. */}
