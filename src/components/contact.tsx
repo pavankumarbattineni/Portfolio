@@ -50,7 +50,7 @@ export function Contact() {
           </h2>
         </InView>
         <p className="mt-5 max-w-xl text-lg text-hero-muted text-pretty">
-          I&apos;m open to GenAI Engineer and Agentic AI Engineer roles. Email is the fastest way to reach me.
+          I&apos;m open to GenAI Engineer and Agentic AI Engineer roles. Reach me by email, phone or LinkedIn.
         </p>
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
